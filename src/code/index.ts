@@ -1,3 +1,38 @@
+// Генератор российских госномеров (легковой/грузовой)
+const RUS_PLATE_LETTERS = ['А','В','Е','К','М','Н','О','Р','С','Т','У','Х'];
+const RUS_PLATE_REGIONS = [
+  '77','97','99','177','197','199','777','797','799', // Москва
+  '78','98','178', // СПб
+  '50','90','150','190','750','790', // МО
+  '16','116', // Татарстан
+  '02','102', // Башкортостан
+  '23','93','123', // Краснодар
+  '61','161', // Ростов
+  '66','96','196', // Свердловская
+  '63','163', // Самара
+  '52','152', // Н. Новгород
+  '54','154', // Новосибирск
+  '74','174', // Челябинск
+  '59','159', // Пермь
+  '36','136', // Воронеж
+  '34','134', // Волгоград
+  '64','164', // Саратов
+  '55','155' // Омск
+];
+
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export function generateRusPlate() {
+  // Формат: Б ддд ББ RR (например, А123ВС777)
+  const L1 = pick(RUS_PLATE_LETTERS);
+  const D = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  const L2 = pick(RUS_PLATE_LETTERS);
+  const L3 = pick(RUS_PLATE_LETTERS);
+  const R = pick(RUS_PLATE_REGIONS);
+  return `${L1}${D}${L2}${L3}${R}`;
+}
 // Вытаскиваем HTML UI как строку через Vite ?raw и показываем
 // Поддержка старого рантайма Figma: читаем UI как строку без шаблонных строк
 // и без встраивания <script type="module">.
@@ -14,7 +49,8 @@ type CollectionId =
   | "snils"
   | "finance"
   | "time"
-  | "names";
+  | "names"
+  | "rus_plate";
 
 type UIMessage =
   | { type: "getCollections" }
@@ -35,7 +71,8 @@ const availableCollections: { id: CollectionId; label: string }[] = [
   { id: "snils", label: "СНИЛС" },
   { id: "finance", label: "Финансы" },
   { id: "time", label: "Время" },
-  { id: "names", label: "Имена" }
+  { id: "names", label: "Имена" },
+  { id: "rus_plate", label: "Госномер РФ" }
 ];
 
 // ---------- Random helpers
@@ -330,7 +367,8 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
   snils: () => generateSnils(),
   finance: () => generateFinance(2), // Default: 2 decimal places, comma separator
   time: (fmt?: string) => generateTime(fmt || "digital_hhmm"),
-  names: (fmt?: string) => generateNames(fmt || "full_fio", "any")
+  names: (fmt?: string) => generateNames(fmt || "full_fio", "any"),
+  rus_plate: () => generateRusPlate()
 };
 
 function collectSelectedTextNodes(): TextNode[] {

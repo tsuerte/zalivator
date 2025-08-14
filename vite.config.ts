@@ -11,8 +11,9 @@ export default defineConfig({
     emptyOutDir: true,
     lib: {
       entry: resolve(__dirname, "src/code/index.ts"),
-      formats: ["cjs"],
-      fileName: () => "code.js"
+      formats: ["iife"],
+      fileName: () => "code.js",
+      name: "ZalivatorPlugin"
     },
     rollupOptions: {},
     minify: "terser",
