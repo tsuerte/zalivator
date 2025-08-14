@@ -54,7 +54,7 @@ type CollectionId =
 
 type UIMessage =
   | { type: "getCollections" }
-  | { type: "apply"; collection: CollectionId; domain?: string; useCustomDomain?: boolean; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; decimalSeparator?: "dot" | "comma"; timeFormat?: string; namesFormat?: string; namesGender?: string };
+  | { type: "apply"; collection: CollectionId; domain?: string; useCustomDomain?: boolean; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; timeFormat?: string; namesFormat?: string; namesGender?: string };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
 
@@ -421,7 +421,7 @@ function ensureWritableFont(node: TextNode): void {
   }
 }
 
-async function applyCollectionToSelection(collection: CollectionId, payload?: { domain?: string; useCustomDomain?: boolean; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; decimalSeparator?: "dot" | "comma"; timeFormat?: string; namesFormat?: string; namesGender?: string }): Promise<number> {
+async function applyCollectionToSelection(collection: CollectionId, payload?: { domain?: string; useCustomDomain?: boolean; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; timeFormat?: string; namesFormat?: string; namesGender?: string }): Promise<number> {
   const textNodes = collectSelectedTextNodes();
   if (textNodes.length === 0) return 0;
 
@@ -434,7 +434,7 @@ async function applyCollectionToSelection(collection: CollectionId, payload?: { 
     } else if (collection === "phone_ru") {
       node.characters = generatePhoneRu(payload?.phoneFormat);
     } else if (collection === "finance") {
-  node.characters = generateFinance(payload?.decimalPlaces);
+      node.characters = generateFinance(payload?.decimalPlaces);
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
     } else if (collection === "names") {
@@ -461,7 +461,6 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       innKind: msg.innKind,
       phoneFormat: msg.phoneFormat,
       decimalPlaces: msg.decimalPlaces,
-      decimalSeparator: msg.decimalSeparator,
       timeFormat: msg.timeFormat,
       namesFormat: msg.namesFormat,
       namesGender: msg.namesGender
