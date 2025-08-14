@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Data</title>
+    <style>
+      body { font: 13px/1.4 -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; margin: 12px; }
+      label { display:block; margin-bottom: 6px; font-weight: 600; }
+      select, button { padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+      .row { display:flex; gap:8px; align-items:center; }
+      #log { margin-top:10px; color:#555; }
+    </style>
+  </head>
+  <body>
+    <h3>Генератор мок‑данных</h3>
+    <label for="collection">Коллекция</label>
+    <div class="row">
+      <select id="collection"></select>
+      <button id="apply">Применить к выбранным</button>
+    </div>
+    <div class="row" id="domainRow" style="margin-top:8px; display:none;">
+      <label for="domain" style="margin:0;">Домен:</label>
+      <input id="domain" type="text" value="company.ru" placeholder="company.ru" style="flex:1; padding:6px 10px; border-radius:8px; border:1px solid #ccc;" />
+    </div>
+    <div class="row" id="innRow" style="margin-top:8px; display:none; gap:12px;">
+      <span>Тип ИНН:</span>
+      <label><input type="radio" name="innKind" value="fl" checked /> ФЛ (12)</label>
+      <label><input type="radio" name="innKind" value="ul" /> ЮЛ (10)</label>
+    </div>
+    <div id="phoneRow" style="margin-top:8px; display:none;">
+      <div style="font-weight:600; margin-bottom:6px;">Формат телефона</div>
+      <label style="display:block; margin:2px 0;">
+        <input type="radio" name="phoneFormat" value="paren_dash" checked />
+        +7 (xxx) xxx-xx-xx
+      </label>
+      <label style="display:block; margin:2px 0;">
+        <input type="radio" name="phoneFormat" value="paren_space" />
+        +7 (xxx) xxx xx xx
+      </label>
+      <label style="display:block; margin:2px 0;">
+        <input type="radio" name="phoneFormat" value="plain_dash" />
+        +7 xxx-xxx-xx-xx
+      </label>
+      <label style="display:block; margin:2px 0;">
+        <input type="radio" name="phoneFormat" value="plain_space" />
+        +7 xxx xxx xx xx
+      </label>
+    </div>
+    <div id="financeRow" style="margin-top:8px; display:none;">
+      <div style="font-weight:600; margin-bottom:6px;">Формат суммы</div>
+      
+      <!-- Превью -->
+      <div style="background:#f5f5f5; padding:8px; border-radius:6px; margin-bottom:8px; font-family:monospace; text-align:center;">
+        <div style="font-size:11px; color:#666; margin-bottom:4px;">Превью</div>
+        <div id="financePreview" style="font-size:14px; font-weight:600;">37 273,50 ₽</div>
+      </div>
+      
+      <!-- Настройки -->
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px;">Знаков после запятой:</span>
+          <select id="decimalPlaces" style="padding:4px 8px; border-radius:4px; border:1px solid #ccc;">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+          </select>
+        </label>
+        <label style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px;">Разделитель:</span>
+          <select id="decimalSeparator" style="padding:4px 8px; border-radius:4px; border:1px solid #ccc;">
+            <option value="comma" selected>Запятая (,)</option>
+            <option value="dot">Точка (.)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    
+    <div id="timeRow" style="margin-top:8px; display:none;">
+      <div style="font-weight:600; margin-bottom:6px;">Формат времени</div>
+      
+      <!-- Превью -->
+      <div style="background:#f5f5f5; padding:8px; border-radius:6px; margin-bottom:8px; font-family:monospace; text-align:center;">
+        <div style="font-size:11px; color:#666; margin-bottom:4px;">Превью</div>
+        <div id="timePreview" style="font-size:14px; font-weight:600;">09:05</div>
+      </div>
+      
+      <!-- Настройки -->
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px;">Формат:</span>
+          <select id="timeFormat" style="padding:4px 8px; border-radius:4px; border:1px solid #ccc; min-width:200px;">
+            <optgroup label="Цифровые (24-часовой)">
+              <option value="digital_hhmm" selected>HH:MM (09:05)</option>
+              <option value="digital_hhmmss">HH:MM:SS (09:05:07)</option>
+            </optgroup>
+            <optgroup label="С единицами измерения">
+              <option value="units_hhmm">Н ч М мин (9 ч 5 мин)</option>
+              <option value="units_hhmmss">Н ч М мин S с (9 ч 5 мин 7 с)</option>
+              <option value="units_hh">Н ч (9 ч)</option>
+              <option value="units_mmss">М мин S с (5 мин 7 с)</option>
+            </optgroup>
+            <optgroup label="Текстовые (полные слова)">
+              <option value="text_hhmm">Н часа М минут (9 часов 5 минут)</option>
+              <option value="text_hhmmss">Н часа М минут S секунд (9 часов 5 минут 7 секунд)</option>
+              <option value="text_hh">Н часа (9 часов)</option>
+              <option value="text_mmss">М минут S секунд (5 минут 7 секунд)</option>
+            </optgroup>
+            <optgroup label="Таймеры / Спортивный">
+              <option value="timer_mmss">MM:SS (05:07)</option>
+              <option value="timer_mss">M:SS (5:07)</option>
+              <option value="timer_mmss_hundredths">MM:SS,SS (05:07,32)</option>
+              <option value="timer_mmss_milliseconds">MM:SS,SSS (05:07,325)</option>
+            </optgroup>
+          </select>
+        </label>
+      </div>
+    </div>
+    
+    <div id="namesRow" style="margin-top:8px; display:none;">
+      <div style="font-weight:600; margin-bottom:6px;">Формат имён</div>
+      
+      <!-- Превью -->
+      <div style="background:#f5f5f5; padding:8px; border-radius:6px; margin-bottom:8px; font-family:monospace; text-align:center;">
+        <div style="font-size:11px; color:#666; margin-bottom:4px;">Превью</div>
+        <div id="namesPreview" style="font-size:14px; font-weight:600;">Иванов Иван Иванович</div>
+      </div>
+      
+      <!-- Настройки -->
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:8px;">
+        <label style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px;">Формат:</span>
+          <select id="namesFormat" style="padding:4px 8px; border-radius:4px; border:1px solid #ccc; min-width:200px;">
+            <option value="full_fio" selected>Полное ФИО (Иванов Иван Иванович)</option>
+            <option value="last_first">Фамилия Имя (Иванов Иван)</option>
+            <option value="first_last">Имя Фамилия (Иван Иванов)</option>
+            <option value="last_initials">Фамилия И. О. (Иванов И. И.)</option>
+            <option value="initials_last">И. О. Фамилия (И. И. Иванов)</option>
+            <option value="last_first_initial">Фамилия И. (Иванов И.)</option>
+          </select>
+        </label>
+        <label style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:12px;">Пол:</span>
+          <select id="namesGender" style="padding:4px 8px; border-radius:4px; border:1px solid #ccc;">
+            <option value="any" selected>Любые</option>
+            <option value="male">Мужской</option>
+            <option value="female">Женский</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div id="log"></div>
+    <script>
+      const collectionSelect = document.getElementById('collection');
+      const applyBtn = document.getElementById('apply');
+      const log = document.getElementById('log');
+      const domainRow = document.getElementById('domainRow');
+      const innRow = document.getElementById('innRow');
+      const domainInput = document.getElementById('domain');
+      const phoneRow = document.getElementById('phoneRow');
+      const financeRow = document.getElementById('financeRow');
+      const financePreview = document.getElementById('financePreview');
+      const decimalPlaces = document.getElementById('decimalPlaces');
+      const decimalSeparator = document.getElementById('decimalSeparator');
+      const timeRow = document.getElementById('timeRow');
+      const timePreview = document.getElementById('timePreview');
+      const timeFormat = document.getElementById('timeFormat');
+      const namesRow = document.getElementById('namesRow');
+      const namesPreview = document.getElementById('namesPreview');
+      const namesFormat = document.getElementById('namesFormat');
+      const namesGender = document.getElementById('namesGender');
+
+      function setLog(text) { log.textContent = text; }
+      
+      function updateFinancePreview() {
+        if (collectionSelect.value === 'finance') {
+          const places = parseInt(decimalPlaces.value);
+          const separator = decimalSeparator.value;
+          let preview = '37 273';
+          
+          if (places > 0) {
+            const sep = separator === 'comma' ? ',' : '.';
+            if (places === 1) {
+              preview += sep + '5';
+            } else if (places === 2) {
+              preview += sep + '50';
+            }
+          }
+          preview += ' ₽';
+          financePreview.textContent = preview;
+        }
+      }
+      
+      function updateTimePreview() {
+        if (collectionSelect.value === 'time') {
+          const format = timeFormat.value;
+          let preview = '';
+          
+          switch (format) {
+            case 'digital_hhmm':
+              preview = '09:05';
+              break;
+            case 'digital_hhmmss':
+              preview = '09:05:07';
+              break;
+            case 'units_hhmm':
+              preview = '9 ч 5 мин';
+              break;
+            case 'units_hhmmss':
+              preview = '9 ч 5 мин 7 с';
+              break;
+            case 'units_hh':
+              preview = '9 ч';
+              break;
+            case 'units_mmss':
+              preview = '5 мин 7 с';
+              break;
+            case 'text_hhmm':
+              preview = '9 часов 5 минут';
+              break;
+            case 'text_hhmmss':
+              preview = '9 часов 5 минут 7 секунд';
+              break;
+            case 'text_hh':
+              preview = '9 часов';
+              break;
+            case 'text_mmss':
+              preview = '5 минут 7 секунд';
+              break;
+            case 'timer_mmss':
+              preview = '05:07';
+              break;
+            case 'timer_mss':
+              preview = '5:07';
+              break;
+            case 'timer_mmss_hundredths':
+              preview = '05:07,32';
+              break;
+            case 'timer_mmss_milliseconds':
+              preview = '05:07,325';
+              break;
+            default:
+              preview = '09:05';
+          }
+          timePreview.textContent = preview;
+        }
+      }
+
+      function updateNamesPreview() {
+        if (collectionSelect.value === 'names') {
+          const format = namesFormat.value;
+          const gender = namesGender.value;
+          let preview = '';
+
+          switch (format) {
+            case 'full_fio':
+              preview = 'Иванов Иван Иванович';
+              break;
+            case 'last_first':
+              preview = 'Иванов Иван';
+              break;
+            case 'first_last':
+              preview = 'Иван Иванов';
+              break;
+            case 'last_initials':
+              preview = 'Иванов И. И.';
+              break;
+            case 'initials_last':
+              preview = 'И. И. Иванов';
+              break;
+            case 'last_first_initial':
+              preview = 'Иванов И.';
+              break;
+            default:
+              preview = 'Иванов Иван Иванович';
+          }
+          if (gender !== 'any') {
+            preview += ' (мужской)'; // Assuming male is the default for 'any'
+          }
+          namesPreview.textContent = preview;
+        }
+      }
+      
+      function updateVisibility() {
+        const isCorp = collectionSelect.value === 'corp_email';
+        const isInn = collectionSelect.value === 'inn';
+        const isPhone = collectionSelect.value === 'phone_ru';
+        const isFinance = collectionSelect.value === 'finance';
+        const isTime = collectionSelect.value === 'time';
+        const isNames = collectionSelect.value === 'names';
+        domainRow.style.display = isCorp ? 'flex' : 'none';
+        innRow.style.display = isInn ? 'flex' : 'none';
+        phoneRow.style.display = isPhone ? 'block' : 'none';
+        financeRow.style.display = isFinance ? 'block' : 'none';
+        timeRow.style.display = isTime ? 'block' : 'none';
+        namesRow.style.display = isNames ? 'block' : 'none';
+      }
+
+      // Запрашиваем коллекции у кода
+      parent.postMessage({ pluginMessage: { type: 'getCollections' } }, '*');
+
+      // Получаем данные от кода
+      onmessage = (event) => {
+        const msg = event.data && event.data.pluginMessage;
+        if (!msg) return;
+        if (msg.type === 'collections') {
+          collectionSelect.innerHTML = '';
+          (msg.items || []).forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.label;
+            collectionSelect.appendChild(opt);
+          });
+          setLog('Коллекции загружены');
+          updateVisibility();
+          updateFinancePreview();
+          updateTimePreview(); // Call updateTimePreview when collections are loaded
+          updateNamesPreview(); // Call updateNamesPreview when collections are loaded
+        } else if (msg.type === 'applied') {
+          setLog('Готово: ' + msg.count + ' слоёв обновлено');
+        }
+      };
+
+      collectionSelect.onchange = updateVisibility;
+      
+      // Обработчики для финансов
+      decimalPlaces.onchange = updateFinancePreview;
+      decimalSeparator.onchange = updateFinancePreview;
+      
+      // Обработчики для времени
+      timeFormat.onchange = updateTimePreview;
+
+      // Обработчики для имён
+      namesFormat.onchange = updateNamesPreview;
+      namesGender.onchange = updateNamesPreview;
+      
+      applyBtn.onclick = () => {
+        const collection = collectionSelect.value;
+        if (collection === 'corp_email') {
+          const domain = (domainInput.value || '').trim() || 'company.ru';
+          parent.postMessage({ pluginMessage: { type: 'apply', collection, domain } }, '*');
+        } else if (collection === 'inn') {
+          const checked = document.querySelector('input[name="innKind"]:checked');
+          const innKind = checked ? checked.value : 'fl';
+          parent.postMessage({ pluginMessage: { type: 'apply', collection, innKind } }, '*');
+        } else if (collection === 'phone_ru') {
+          const checked = document.querySelector('input[name="phoneFormat"]:checked');
+          const phoneFormat = checked ? checked.value : 'paren_dash';
+          parent.postMessage({ pluginMessage: { type: 'apply', collection, phoneFormat } }, '*');
+        } else if (collection === 'finance') {
+          const places = parseInt(decimalPlaces.value);
+          const separator = decimalSeparator.value;
+          parent.postMessage({ pluginMessage: { type: 'apply', collection, decimalPlaces: places, decimalSeparator: separator } }, '*');
+        } else if (collection === 'time') {
+          const format = timeFormat.value;
+          parent.postMessage({ pluginMessage: { type: 'apply', collection, timeFormat: format } }, '*');
+        } else if (collection === 'names') {
+          const format = namesFormat.value;
+          const gender = namesGender.value;
+          parent.postMessage({ pluginMessage: { type: 'apply', collection, namesFormat: format, namesGender: gender } }, '*');
+        } else {
+          parent.postMessage({ pluginMessage: { type: 'apply', collection } }, '*');
+        }
+      };
+    </script>
+  </body>
+</html>
+
