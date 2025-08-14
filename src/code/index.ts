@@ -18,9 +18,9 @@ type CollectionId =
 
 type UIMessage =
   | { type: "getCollections" }
-  | { type: "apply"; collection: CollectionId; domain?: string; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; decimalSeparator?: "dot" | "comma"; timeFormat?: string; namesFormat?: string; namesGender?: string };
+  | { type: "apply"; collection: CollectionId; domain?: string; useCustomDomain?: boolean; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; decimalSeparator?: "dot" | "comma"; timeFormat?: string; namesFormat?: string; namesGender?: string };
 
-type PhoneFormatId = "paren_dash" | "paren_space" | "plain_dash" | "plain_space";
+type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
 
 type CodeMessage =
   | { type: "collections"; items: { id: CollectionId; label: string }[] }
@@ -30,7 +30,7 @@ const availableCollections: { id: CollectionId; label: string }[] = [
   { id: "inn", label: "ИНН" },
   { id: "kpp", label: "КПП" },
   { id: "passport_ru", label: "Паспорт РФ" },
-  { id: "corp_email", label: "Корп. e‑mail" },
+  { id: "corp_email", label: "Эл. почта" },
   { id: "phone_ru", label: "Телефон РФ" },
   { id: "snils", label: "СНИЛС" },
   { id: "finance", label: "Финансы" },
@@ -78,24 +78,50 @@ const generatePassportRu = (): string => {
   return `${series} ${number}`;
 };
 
-const generateCorpEmail = (domainOverride?: string): string => {
-  const first = ["ivan", "petr", "alex", "sergey", "maria", "anna", "nikita", "svetlana"][randomInt(0, 7)];
-  const last = ["ivanov", "petrov", "smirnov", "sidorov", "kozlov", "volkova", "morozov", "sokolov"][randomInt(0, 7)];
-  const num = randomInt(1, 999).toString();
-  const domain = (domainOverride && domainOverride.trim()) || "company.ru";
-  return `${first}.${last}${num}@${domain}`;
+const corpDomains = [
+  "company.ru", "corp.com", "business.org", "office.net", "enterprise.ru", "group.su", "holding.ru", "firm.com", "agency.ru", "consulting.ru",
+  "solutions.ru", "partners.ru", "team.ru", "service.ru", "systems.ru", "it.ru", "dev.ru", "design.ru", "marketing.ru", "sales.ru",
+  "finance.ru", "legal.ru", "support.ru", "hr.ru", "admin.ru", "cloud.ru", "media.ru", "brand.ru", "project.ru", "startup.ru",
+  "logistics.ru", "import.ru", "export.ru", "trade.ru", "shop.ru", "store.ru", "market.ru", "bank.ru", "insurance.ru", "travel.ru",
+  "auto.ru", "realty.ru", "property.ru", "build.ru", "event.ru", "promo.ru", "food.ru", "health.ru", "clinic.ru", "school.ru"
+];
+
+const firstNames = [
+  "ivan", "petr", "alex", "sergey", "maria", "anna", "nikita", "svetlana",
+  "olga", "dmitry", "elena", "andrey", "irina", "viktor", "natalia", "egor",
+  "maxim", "tatiana", "roman", "galina",
+  "artem", "valeria", "denis", "ksenia", "boris", "arina", "timur", "sofia",
+  "vadim", "polina", "ilya", "ekaterina", "vladimir", "milana", "anton", "alisa",
+  "grigory", "veronika", "stanislav", "daria"
+];
+const lastNames = [
+  "ivanov", "petrov", "smirnov", "sidorov", "kozlov", "volkova", "morozov", "sokolov",
+  "novikov", "lebedev", "popova", "vasiliev", "egorova", "pavlova", "nikitina", "makarov",
+  "fedorov", "semenov", "kuznetsova", "orlov",
+  "zaitsev", "solovyov", "borisov", "yakovlev", "grigoriev", "romanov", "vorobyov", "sergeev",
+  "kuzmin", "maximov", "filippov", "vlasov", "titov", "chernov", "abramov", "martynov",
+  "efimov", "denisov", "belyaev", "terentiev"
+];
+const generateCorpEmail = (domainOverride?: string, useCustomDomain?: boolean): string => {
+  const first = firstNames[randomInt(0, firstNames.length - 1)];
+  const last = lastNames[randomInt(0, lastNames.length - 1)];
+  let domain = "company.ru";
+  if (useCustomDomain && domainOverride && domainOverride.trim()) {
+    domain = domainOverride.trim();
+  } else if (!useCustomDomain) {
+    domain = corpDomains[randomInt(0, corpDomains.length - 1)];
+  }
+  return `${first}.${last}@${domain}`;
 };
 
-const generatePhoneRu = (fmt: PhoneFormatId = "paren_dash"): string => {
+const generatePhoneRu = (fmt: PhoneFormatId = "space_dash"): string => {
   const p2 = randomInt(900, 999).toString();
   const p3 = randomInt(100, 999).toString();
   const p4 = randomInt(10, 99).toString();
   const p5 = randomInt(10, 99).toString();
   switch (fmt) {
-    case "paren_space":
-      return `+7 (${p2}) ${p3} ${p4} ${p5}`;
-    case "plain_dash":
-      return `+7 ${p2}-${p3}-${p4}-${p5}`;
+    case "space_dash":
+      return `+7 ${p2} ${p3}-${p4}-${p5}`;
     case "plain_space":
       return `+7 ${p2} ${p3} ${p4} ${p5}`;
     case "paren_dash":
@@ -119,7 +145,7 @@ const generateTime = (format: string = "digital_hhmm"): string => {
   const hundredths = randomInt(0, 99);
   const milliseconds = randomInt(0, 999);
   
-  // Узкий неразрывный пробел для единиц измерения
+  // Узкий неразрывной пробел для единиц измерения
   const narrowSpace = "\u202F";
   
   // Функция для склонения часов
@@ -268,7 +294,7 @@ const generateNames = (format: string = "full_fio", gender: string = "any"): str
   }
 };
 
-const generateFinance = (decimalPlaces: number = 2, separator: "dot" | "comma" = "comma"): string => {
+const generateFinance = (decimalPlaces: number = 2): string => {
   const rubles = randomInt(1, 99999).toString();
   
   // Добавляем разделители тысяч для чисел > 999
@@ -282,7 +308,7 @@ const generateFinance = (decimalPlaces: number = 2, separator: "dot" | "comma" =
   };
   
   const formattedRubles = formatThousands(rubles);
-  const sep = separator === "comma" ? "," : ".";
+  const sep = ",";
   
   if (decimalPlaces === 0) {
     return `${formattedRubles} ₽`;
@@ -295,14 +321,14 @@ const generateFinance = (decimalPlaces: number = 2, separator: "dot" | "comma" =
   }
 };
 
-const generatorById: Record<CollectionId, (arg?: string) => string> = {
+const generatorById: Record<CollectionId, (arg?: any) => string> = {
   inn: () => generateInnFl(), // Default to FL, UI can override
   kpp: () => generateKpp(),
   passport_ru: () => generatePassportRu(),
-  corp_email: (domain?: string) => generateCorpEmail(domain),
+  corp_email: (payload?: { domain?: string; useCustomDomain?: boolean }) => generateCorpEmail(payload?.domain, payload?.useCustomDomain),
   phone_ru: (fmt?: string) => generatePhoneRu((fmt as PhoneFormatId) || "paren_dash"),
   snils: () => generateSnils(),
-  finance: () => generateFinance(2, "comma"), // Default: 2 decimal places, comma separator
+  finance: () => generateFinance(2), // Default: 2 decimal places, comma separator
   time: (fmt?: string) => generateTime(fmt || "digital_hhmm"),
   names: (fmt?: string) => generateNames(fmt || "full_fio", "any")
 };
@@ -357,7 +383,7 @@ function ensureWritableFont(node: TextNode): void {
   }
 }
 
-async function applyCollectionToSelection(collection: CollectionId, payload?: { domain?: string; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; decimalSeparator?: "dot" | "comma"; timeFormat?: string; namesFormat?: string; namesGender?: string }): Promise<number> {
+async function applyCollectionToSelection(collection: CollectionId, payload?: { domain?: string; useCustomDomain?: boolean; innKind?: "fl" | "ul"; phoneFormat?: PhoneFormatId; decimalPlaces?: number; decimalSeparator?: "dot" | "comma"; timeFormat?: string; namesFormat?: string; namesGender?: string }): Promise<number> {
   const textNodes = collectSelectedTextNodes();
   if (textNodes.length === 0) return 0;
 
@@ -370,11 +396,13 @@ async function applyCollectionToSelection(collection: CollectionId, payload?: { 
     } else if (collection === "phone_ru") {
       node.characters = generatePhoneRu(payload?.phoneFormat);
     } else if (collection === "finance") {
-      node.characters = generateFinance(payload?.decimalPlaces, payload?.decimalSeparator);
+  node.characters = generateFinance(payload?.decimalPlaces);
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
     } else if (collection === "names") {
       node.characters = generateNames(payload?.namesFormat, payload?.namesGender);
+    } else if (collection === "corp_email") {
+      node.characters = generateCorpEmail(payload?.domain, payload?.useCustomDomain);
     } else {
       node.characters = gen(payload?.domain);
     }
@@ -389,7 +417,17 @@ figma.ui.onmessage = async (msg: UIMessage) => {
     return;
   }
   if (msg.type === "apply") {
-    const count = await applyCollectionToSelection(msg.collection, { domain: msg.domain, innKind: msg.innKind, phoneFormat: msg.phoneFormat, decimalPlaces: msg.decimalPlaces, decimalSeparator: msg.decimalSeparator, timeFormat: msg.timeFormat, namesFormat: msg.namesFormat, namesGender: msg.namesGender });
+    const count = await applyCollectionToSelection(msg.collection, {
+      domain: msg.domain,
+      useCustomDomain: msg.useCustomDomain,
+      innKind: msg.innKind,
+      phoneFormat: msg.phoneFormat,
+      decimalPlaces: msg.decimalPlaces,
+      decimalSeparator: msg.decimalSeparator,
+      timeFormat: msg.timeFormat,
+      namesFormat: msg.namesFormat,
+      namesGender: msg.namesGender
+    });
     figma.ui.postMessage({ type: "applied", count } as any);
     if (count === 0) {
       figma.notify("Выберите текстовые слои");

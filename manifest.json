@@ -1,5 +1,5 @@
 {
-  "name": "Hello World Plugin",
+  "name": "Zalivator",
   "id": "hello-world-plugin",
   "api": "1.0.0",
   "main": "dist/code.js",
