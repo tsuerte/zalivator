@@ -245,7 +245,6 @@
       const timePreview = document.getElementById('timePreview');
       const timeFormat = document.getElementById('timeFormat');
       const namesRow = document.getElementById('namesRow');
-      const namesPreview = document.getElementById('namesPreview');
       const namesFormat = document.getElementById('namesFormat');
       const namesGenderRadios = document.querySelectorAll('input[name="namesGender"]');
       const corpDomainMode = document.getElementById('corpDomainMode');
@@ -324,41 +323,6 @@
           timePreview.textContent = preview;
         }
       }
-
-      function updateNamesPreview() {
-        if (collectionSelect.value === 'names') {
-          const format = namesFormat.value;
-          const gender = getSelectedNamesGender();
-          let preview = '';
-
-          switch (format) {
-            case 'full_fio':
-              preview = 'Иванов Иван Иванович';
-              break;
-            case 'last_first':
-              preview = 'Иванов Иван';
-              break;
-            case 'first_last':
-              preview = 'Иван Иванов';
-              break;
-            case 'last_initials':
-              preview = 'Иванов И. И.';
-              break;
-            case 'initials_last':
-              preview = 'И. И. Иванов';
-              break;
-            case 'last_first_initial':
-              preview = 'Иванов И.';
-              break;
-            default:
-              preview = 'Иванов Иван Иванович';
-          }
-          if (gender !== 'any') {
-            preview += ' (мужской)'; // Assuming male is the default for 'any'
-          }
-          namesPreview.textContent = preview;
-        }
-      }
       
       function updateVisibility() {
         const isCorp = collectionSelect.value === 'corp_email';
@@ -413,7 +377,6 @@
           updateVisibility();
           updateFinancePreview();
           updateTimePreview(); // Call updateTimePreview when collections are loaded
-          updateNamesPreview(); // Call updateNamesPreview when collections are loaded
         } else if (msg.type === 'applied') {
           setLog('Готово: ' + msg.count + ' слоёв обновлено');
         }
@@ -430,9 +393,9 @@
       // Обработчики для времени
       timeFormat.onchange = updateTimePreview;
 
-      // Обработчики для имён
-      namesFormat.onchange = updateNamesPreview;
-      namesGenderRadios.forEach(radio => radio.addEventListener('change', updateNamesPreview));
+      // Стало:
+      namesFormat.onchange = () => {};
+      namesGenderRadios.forEach(radio => radio.addEventListener('change', () => {}));
       
       // Обработчик для корпоративного домена
       corpDomainMode.addEventListener('change', updateDomainRow);
