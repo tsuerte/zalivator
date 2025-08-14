@@ -9,13 +9,16 @@ export default defineConfig({
     target: "es2016",
     outDir: "dist",
     emptyOutDir: true,
-    lib: {
-      entry: resolve(__dirname, "src/code/index.ts"),
-      formats: ["iife"],
-      fileName: () => "code.js",
-      name: "ZalivatorPlugin"
+    rollupOptions: {
+      input: {
+        code: resolve(__dirname, "src/code/index.ts"),
+        ui: resolve(__dirname, "src/ui/main.ts")
+      },
+      output: {
+        entryFileNames: "[name].js",
+        format: "es"
+      }
     },
-    rollupOptions: {},
     minify: "terser",
     terserOptions: {
       ecma: 2016,
