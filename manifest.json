@@ -1,6 +1,6 @@
 {
   "name": "Zalivator",
-  "id": "hello-world-plugin",
+  "id": "zalivator",
   "api": "1.0.0",
   "main": "dist/code.js",
   "editorType": ["figma"],
