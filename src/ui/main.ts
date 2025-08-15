@@ -9,9 +9,9 @@ if (btn) {
 
 // Receive messages from code.ts
 onmessage = (event: MessageEvent) => {
-  const pluginMessage = (event.data && (event.data as any).pluginMessage) || null;
+  const pluginMessage =
+    (event.data && (event.data as any).pluginMessage) || null;
   if (pluginMessage?.type === "hello-from-code" && msg) {
     msg.textContent = pluginMessage.text as string;
   }
 };
-

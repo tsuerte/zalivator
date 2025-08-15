@@ -3,7 +3,7 @@ import { resolve } from "path";
 export default defineConfig({
   base: "./",
   esbuild: {
-    target: "es2016"
+    target: "es2016",
   },
   build: {
     target: "es2016",
@@ -13,18 +13,18 @@ export default defineConfig({
       entry: resolve(__dirname, "src/code/index.ts"),
       formats: ["iife"],
       fileName: () => "code.js",
-      name: "ZalivatorPlugin"
+      name: "ZalivatorPlugin",
     },
     rollupOptions: {},
     minify: "terser",
     terserOptions: {
       ecma: 2016,
       compress: {
-        ecma: 2016
+        ecma: 2016,
       },
       format: {
-        ecma: 2016
-      }
-    }
-  }
+        ecma: 2016,
+      },
+    },
+  },
 });
