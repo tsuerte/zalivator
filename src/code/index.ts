@@ -1,3 +1,5 @@
+import uiHtml from '../ui/ui.html?raw';
+
 // Генератор российских госномеров (легковой/грузовой)
 const RUS_PLATE_LETTERS = ['А','В','Е','К','М','Н','О','Р','С','Т','У','Х'];
 const RUS_PLATE_REGIONS = [
@@ -33,9 +35,8 @@ export function generateRusPlate() {
   const R = pick(RUS_PLATE_REGIONS);
   return `${L1}${D}${L2}${L3}${R}`;
 }
-// Показываем UI из собранного HTML, встроенного через __html__
-declare const __html__: string;
-figma.showUI(__html__, { width: 360, height: 240 });
+// Показываем UI из импортированного HTML
+figma.showUI(uiHtml, { width: 360, height: 240 });
 
 type CollectionId =
   | "inn"
