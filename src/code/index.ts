@@ -35,8 +35,6 @@ export function generateRusPlate() {
   const R = pick(RUS_PLATE_REGIONS);
   return `${L1}${D}${L2}${L3}${R}`;
 }
-// Показываем UI из импортированного HTML
-figma.showUI(uiHtml, { width: 360, height: 240 });
 
 type CollectionId =
   | "inn"
@@ -471,3 +469,6 @@ figma.ui.onmessage = async (msg: UIMessage) => {
     }
   }
 };
+
+// Показываем UI из импортированного HTML после настройки обработчиков
+figma.showUI(uiHtml, { width: 360, height: 240 });
