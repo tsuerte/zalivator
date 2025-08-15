@@ -1,10 +1,25 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { copyFileSync } from "fs";
+
+function copyUiHtml() {
+  return {
+    name: "copy-ui-html",
+    writeBundle() {
+      copyFileSync(
+        resolve(__dirname, "src/ui/ui.html"),
+        resolve(__dirname, "dist/ui.html")
+      );
+    }
+  };
+}
+
 export default defineConfig({
   base: "./",
   esbuild: {
     target: "es2016"
   },
+  plugins: [copyUiHtml()],
   build: {
     target: "es2016",
     outDir: "dist",

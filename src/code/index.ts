@@ -33,12 +33,9 @@ export function generateRusPlate() {
   const R = pick(RUS_PLATE_REGIONS);
   return `${L1}${D}${L2}${L3}${R}`;
 }
-// Вытаскиваем HTML UI как строку через Vite ?raw и показываем
-// Поддержка старого рантайма Figma: читаем UI как строку без шаблонных строк
-// и без встраивания <script type="module">.
-import uiHtml from "../ui/ui.html?raw";
-const uiString: string = String(uiHtml);
-figma.showUI(uiString, { width: 360, height: 240 });
+// Показываем UI из собранного HTML, встроенного через __html__
+declare const __html__: string;
+figma.showUI(__html__, { width: 360, height: 240 });
 
 type CollectionId =
   | "inn"
