@@ -6,7 +6,7 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["@figma/plugin-typings", "vite/client"]
+    "types": ["@figma/plugin-typings"]
   },
-  "include": ["src"]
+  "include": ["*.ts"]
 }

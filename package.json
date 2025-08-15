@@ -2,18 +2,12 @@
   "name": "zalivator",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite build --watch",
-    "clean": "rimraf dist"
+    "build": "tsc",
+    "watch": "tsc -w"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.107.0",
-    "@types/node": "^22.7.5",
-    "rimraf": "^5.0.7",
-    "terser": "^5.43.1",
-    "typescript": "^5.4.5",
-    "vite": "^5.4.8"
+    "typescript": "^5.4.5"
   }
 }

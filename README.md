@@ -5,7 +5,7 @@ Figma plugin **Zalivator**.
 ## Development
 
 ```sh
-npm run dev
+npm run watch
 ```
 
 ## Build
