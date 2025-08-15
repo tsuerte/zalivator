@@ -1,12 +1,17 @@
 import { defineConfig } from "vite";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+
+// В ESM __dirname не определён — вычисляем вручную
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
   base: "./",
   esbuild: {
-    target: "es2016",
+    target: "es2019",
   },
   build: {
-    target: "es2016",
+    target: "es2019",
     outDir: "dist",
     emptyOutDir: true,
     lib: {
@@ -18,12 +23,12 @@ export default defineConfig({
     rollupOptions: {},
     minify: "terser",
     terserOptions: {
-      ecma: 2016,
+      ecma: 2019,
       compress: {
-        ecma: 2016,
+        ecma: 2019,
       },
       format: {
-        ecma: 2016,
+        ecma: 2019,
       },
     },
   },

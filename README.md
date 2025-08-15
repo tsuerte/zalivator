@@ -16,4 +16,7 @@ npm run build
 
 ## Publishing
 
-Ensure the package name in `package.json` and the `id` in `manifest.json` are both set to `zalivator` before publishing to Figma Community.
+Publishing to Figma Community:
+- On first publish, omit the `id` or let Figma assign it. After publish, keep this `id` unchanged for future updates.
+- Keep `name` consistent as desired (e.g., `Zalivator`).
+- Build artifact is `dist/code.js` from `npm run build` or `npm run release`.
