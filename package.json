@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "release": "npm run clean && npm run build"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.107.0",

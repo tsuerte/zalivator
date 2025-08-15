@@ -1,10 +1,12 @@
 import uiHtml from "../ui/ui.html?raw";
+import mainJs from "../ui/main.js?raw";
+import numbersJs from "../ui/numbers.js?raw";
 
-const uiString: string = String(uiHtml);
-// Вытаскиваем HTML UI как строку через Vite ?raw и показываем
-// Поддержка старого рантайма Figma: читаем UI как строку без шаблонных строк
-// и без встраивания <script type="module">.
-figma.showUI(uiString, { width: 360, height: 240 });
+// Инжектим внешние UI-скрипты в плейсхолдеры внутри HTML
+let uiString: string = String(uiHtml);
+uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
+uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", String(numbersJs));
+figma.showUI(uiString, { width: 360, height: 260 });
 
 // Генератор российских госномеров (легковой/грузовой)
 const RUS_PLATE_LETTERS = [
@@ -95,7 +97,8 @@ type CollectionId =
   | "finance"
   | "time"
   | "names"
-  | "rus_plate";
+  | "rus_plate"
+  | "numbers";
 
 type UIMessage =
   | { type: "getCollections" }
@@ -110,6 +113,7 @@ type UIMessage =
       timeFormat?: string;
       namesFormat?: string;
       namesGender?: string;
+      numbersDecimal?: boolean;
     };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
@@ -129,7 +133,11 @@ const availableCollections: { id: CollectionId; label: string }[] = [
   { id: "time", label: "Время" },
   { id: "names", label: "Имена" },
   { id: "rus_plate", label: "Госномер РФ" },
+  { id: "numbers", label: "Числа" },
 ];
+
+// Ранний пуш коллекций в UI (на случай, если UI не успел запросить)
+figma.ui.postMessage({ type: "collections", items: availableCollections } as any);
 
 // ---------- Random helpers
 const randomInt = (min: number, max: number): number =>
@@ -860,7 +868,16 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
   time: (fmt?: string) => generateTime(fmt || "digital_hhmm"),
   names: (fmt?: string) => generateNames(fmt || "full_fio", "any"),
   rus_plate: () => generateRusPlate(),
+  numbers: (isDec?: boolean) => generateNumber(Boolean(isDec)),
 };
+
+function generateNumber(isDecimal: boolean): string {
+  if (!isDecimal) {
+    return String(randomInt(1, 10));
+  }
+  const value = 1 + Math.random() * 9; // [1;10)
+  return value.toFixed(2); // десятичное число с 2 знаками
+}
 
 function collectSelectedTextNodes(): TextNode[] {
   const result: TextNode[] = [];
@@ -877,39 +894,15 @@ function collectSelectedTextNodes(): TextNode[] {
   return result;
 }
 
-async function loadFontsForNodes(textNodes: TextNode[]): Promise<void> {
-  const fontsToLoad = new Set<string>();
-  for (const node of textNodes) {
-    try {
-      const fontName = node.fontName as FontName | typeof figma.mixed;
-      if (fontName !== figma.mixed) {
-        fontsToLoad.add(`${fontName.family}__${fontName.style}`);
-      } else {
-        fontsToLoad.add(`Roboto__Regular`);
-      }
-    } catch (err) {
-      void err;
-      fontsToLoad.add(`Roboto__Regular`);
-    }
-  }
-  await Promise.all(
-    Array.from(fontsToLoad).map((key) => {
-      const [family, style] = key.split("__");
-      return figma.loadFontAsync({ family, style } as FontName);
-    }),
-  );
+const DEFAULT_FONT: FontName = { family: "Roboto", style: "Regular" };
+
+async function loadDefaultFont(): Promise<void> {
+  await figma.loadFontAsync(DEFAULT_FONT);
 }
 
 function ensureWritableFont(node: TextNode): void {
-  try {
-    const fontName = node.fontName as FontName | typeof figma.mixed;
-    if (fontName === figma.mixed) {
-      node.fontName = { family: "Roboto", style: "Regular" };
-    }
-  } catch (err) {
-    void err;
-    node.fontName = { family: "Roboto", style: "Regular" };
-  }
+  // Проще и предсказуемее: используем дефолтный шрифт
+  node.fontName = DEFAULT_FONT;
 }
 
 async function applyCollectionToSelection(
@@ -923,12 +916,13 @@ async function applyCollectionToSelection(
     timeFormat?: string;
     namesFormat?: string;
     namesGender?: string;
+    numbersDecimal?: boolean;
   },
 ): Promise<number> {
   const textNodes = collectSelectedTextNodes();
   if (textNodes.length === 0) return 0;
 
-  await loadFontsForNodes(textNodes);
+  await loadDefaultFont();
   const gen = generatorById[collection];
   for (const node of textNodes) {
     ensureWritableFont(node);
@@ -946,6 +940,8 @@ async function applyCollectionToSelection(
         payload?.namesFormat,
         payload?.namesGender,
       );
+    } else if (collection === "numbers") {
+      node.characters = generateNumber(Boolean(payload?.numbersDecimal));
     } else if (collection === "corp_email") {
       node.characters = generateCorpEmail(
         payload?.domain,
@@ -977,6 +973,7 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       timeFormat: msg.timeFormat,
       namesFormat: msg.namesFormat,
       namesGender: msg.namesGender,
+      numbersDecimal: msg.numbersDecimal,
     });
     figma.ui.postMessage({ type: "applied", count } as any);
     if (count === 0) {
