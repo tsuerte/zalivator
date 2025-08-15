@@ -127,11 +127,8 @@ function getSelectedNamesGender(): string {
   return 'any';
 }
 
-// Request collections from code
-parent.postMessage({ pluginMessage: { type: 'getCollections' } }, '*');
-
 // Receive data from code
-onmessage = (event: MessageEvent) => {
+window.addEventListener('message', (event: MessageEvent) => {
   const msg = (event.data as any)?.pluginMessage;
   if (!msg) return;
   if (msg.type === 'collections') {
@@ -149,7 +146,10 @@ onmessage = (event: MessageEvent) => {
   } else if (msg.type === 'applied') {
     setLog('Готово: ' + msg.count + ' слоёв обновлено');
   }
-};
+});
+
+// Request collections from code
+parent.postMessage({ pluginMessage: { type: 'getCollections' } }, '*');
 
 collectionSelect.onchange = () => {
   updateVisibility();
