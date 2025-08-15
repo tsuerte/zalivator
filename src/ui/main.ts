@@ -131,7 +131,7 @@ function getSelectedNamesGender(): string {
 parent.postMessage({ pluginMessage: { type: 'getCollections' } }, '*');
 
 // Receive data from code
-onmessage = (event: MessageEvent) => {
+window.onmessage = (event: MessageEvent) => {
   const msg = (event.data as any)?.pluginMessage;
   if (!msg) return;
   if (msg.type === 'collections') {
