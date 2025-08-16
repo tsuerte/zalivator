@@ -66,36 +66,44 @@
     timePreview.textContent = map[fmt] || "09:05";
   }
 
+  // Toggle visibility via CSS class (no inline display)
+  function setVisible(el, visible) {
+    if (!el) return;
+    if (visible) el.classList.remove("hidden");
+    else el.classList.add("hidden");
+  }
+
   function updateVisibility() {
     const val = collectionSelect.value;
-    const isCorp = val === "corp_email";
-    const isInn = val === "inn";
-    const isPhone = val === "phone_ru";
-    const isFinance = val === "finance";
-    const isTime = val === "time";
-    const isNames = val === "names";
-    const isNumbers = val === "numbers";
 
-    domainRow.style.display = isCorp ? "flex" : "none";
-    innRow.style.display = isInn ? "flex" : "none";
-    phoneRow.style.display = isPhone ? "block" : "none";
-    financeRow.style.display = isFinance ? "block" : "none";
-    timeRow.style.display = isTime ? "block" : "none";
-    namesRow.style.display = isNames ? "block" : "none";
-    if (numbersRow) numbersRow.style.display = isNumbers ? "flex" : "none";
+    const map = {
+      corp_email: ["domainRow"],
+      inn: ["innRow"],
+      phone_ru: ["phoneRow"],
+      finance: ["financeRow"],
+      time: ["timeRow"],
+      names: ["namesRow"],
+      numbers: ["numbersRow"],
+    };
+
+    const all = { domainRow, innRow, phoneRow, financeRow, timeRow, namesRow, numbersRow };
+
+    // Hide all rows first
+    Object.values(all).forEach((el) => setVisible(el, false));
+    // Show mapped rows
+    (map[val] || []).forEach((id) => setVisible(all[id], true));
+
+    // Update inner controls visibility for domain row
+    updateDomainRow();
   }
 
   function updateDomainRow() {
     const isCorpEmail = collectionSelect.value === "corp_email";
-    domainRow.style.display = isCorpEmail ? "flex" : "none";
-    if (!domainInput) return;
-    if (isCorpEmail && corpDomainMode && corpDomainMode.checked) {
-      domainInput.style.display = "";
-      if (domainLabel) domainLabel.style.display = "";
-    } else {
-      domainInput.style.display = "none";
-      if (domainLabel) domainLabel.style.display = "none";
-    }
+    const innerVisible = isCorpEmail && corpDomainMode && corpDomainMode.checked;
+    setVisible(domainInput, innerVisible);
+    if (domainLabel) setVisible(domainLabel, innerVisible);
+    const note = domainRow ? domainRow.querySelector(".note-text") : null;
+    if (note) setVisible(note, innerVisible);
   }
 
   function getSelectedNamesGender() {
@@ -138,6 +146,9 @@
   if (timeFormat) timeFormat.onchange = updateTimePreview;
   if (corpDomainMode) corpDomainMode.addEventListener("change", updateDomainRow);
 
+  // Initialize hidden state early
+  updateVisibility();
+
   // Применение
   applyBtn.onclick = () => {
     const collection = collectionSelect.value;
@@ -172,4 +183,3 @@
     }
   };
 })();
-
