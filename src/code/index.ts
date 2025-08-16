@@ -2,81 +2,20 @@ import uiHtml from "../ui/ui.html?raw";
 import stylesCss from "../ui/styles.css?raw";
 import mainJs from "../ui/main.js?raw";
 import numbersJs from "../ui/numbers.js?raw";
+import { RUS_PLATE_LETTERS, RUS_PLATE_REGIONS } from "../data/rusPlate";
+import { corpDomains } from "../data/corp";
+import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, namesRuMaleLast, namesRuFemaleLast, namesRUFemalePatronymics, namesRUMalePatronymics } from "../data/names";
 
 // Собираем строку HTML с инъекцией стилей и скриптов
 let uiString: string = String(uiHtml);
 uiString = uiString.replace("/*__INJECT_STYLES__*/", String(stylesCss));
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", String(numbersJs));
-figma.showUI(uiString, { width: 360, height: 260 });
+figma.showUI(uiString, { width: 400, height: 360 });
 
 // Генератор российских госномеров (легковой/грузовой)
-const RUS_PLATE_LETTERS = [
-  "А",
-  "В",
-  "Е",
-  "К",
-  "М",
-  "Н",
-  "О",
-  "Р",
-  "С",
-  "Т",
-  "У",
-  "Х",
-];
-const RUS_PLATE_REGIONS = [
-  "77",
-  "97",
-  "99",
-  "177",
-  "197",
-  "199",
-  "777",
-  "797",
-  "799", // Москва
-  "78",
-  "98",
-  "178", // СПб
-  "50",
-  "90",
-  "150",
-  "190",
-  "750",
-  "790", // МО
-  "16",
-  "116", // Татарстан
-  "02",
-  "102", // Башкортостан
-  "23",
-  "93",
-  "123", // Краснодар
-  "61",
-  "161", // Ростов
-  "66",
-  "96",
-  "196", // Свердловская
-  "63",
-  "163", // Самара
-  "52",
-  "152", // Н. Новгород
-  "54",
-  "154", // Новосибирск
-  "74",
-  "174", // Челябинск
-  "59",
-  "159", // Пермь
-  "36",
-  "136", // Воронеж
-  "34",
-  "134", // Волгоград
-  "64",
-  "164", // Саратов
-  "55",
-  "155", // Омск
-];
 
-function pick<T>(arr: T[]): T {
+function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -206,149 +145,13 @@ const generatePassportRu = (): string => {
   return `${series} ${number}`;
 };
 
-const corpDomains = [
-  "company.ru",
-  "corp.com",
-  "business.org",
-  "office.net",
-  "enterprise.ru",
-  "group.su",
-  "holding.ru",
-  "firm.com",
-  "agency.ru",
-  "consulting.ru",
-  "solutions.ru",
-  "partners.ru",
-  "team.ru",
-  "service.ru",
-  "systems.ru",
-  "it.ru",
-  "dev.ru",
-  "design.ru",
-  "marketing.ru",
-  "sales.ru",
-  "finance.ru",
-  "legal.ru",
-  "support.ru",
-  "hr.ru",
-  "admin.ru",
-  "cloud.ru",
-  "media.ru",
-  "brand.ru",
-  "project.ru",
-  "startup.ru",
-  "logistics.ru",
-  "import.ru",
-  "export.ru",
-  "trade.ru",
-  "shop.ru",
-  "store.ru",
-  "market.ru",
-  "bank.ru",
-  "insurance.ru",
-  "travel.ru",
-  "auto.ru",
-  "realty.ru",
-  "property.ru",
-  "build.ru",
-  "event.ru",
-  "promo.ru",
-  "food.ru",
-  "health.ru",
-  "clinic.ru",
-  "school.ru",
-];
 
-const firstNames = [
-  "ivan",
-  "petr",
-  "alex",
-  "sergey",
-  "maria",
-  "anna",
-  "nikita",
-  "svetlana",
-  "olga",
-  "dmitry",
-  "elena",
-  "andrey",
-  "irina",
-  "viktor",
-  "natalia",
-  "egor",
-  "maxim",
-  "tatiana",
-  "roman",
-  "galina",
-  "artem",
-  "valeria",
-  "denis",
-  "ksenia",
-  "boris",
-  "arina",
-  "timur",
-  "sofia",
-  "vadim",
-  "polina",
-  "ilya",
-  "ekaterina",
-  "vladimir",
-  "milana",
-  "anton",
-  "alisa",
-  "grigory",
-  "veronika",
-  "stanislav",
-  "daria",
-];
-const lastNames = [
-  "ivanov",
-  "petrov",
-  "smirnov",
-  "sidorov",
-  "kozlov",
-  "volkova",
-  "morozov",
-  "sokolov",
-  "novikov",
-  "lebedev",
-  "popova",
-  "vasiliev",
-  "egorova",
-  "pavlova",
-  "nikitina",
-  "makarov",
-  "fedorov",
-  "semenov",
-  "kuznetsova",
-  "orlov",
-  "zaitsev",
-  "solovyov",
-  "borisov",
-  "yakovlev",
-  "grigoriev",
-  "romanov",
-  "vorobyov",
-  "sergeev",
-  "kuzmin",
-  "maximov",
-  "filippov",
-  "vlasov",
-  "titov",
-  "chernov",
-  "abramov",
-  "martynov",
-  "efimov",
-  "denisov",
-  "belyaev",
-  "terentiev",
-];
 const generateCorpEmail = (
   domainOverride?: string,
   useCustomDomain?: boolean,
 ): string => {
-  const first = firstNames[randomInt(0, firstNames.length - 1)];
-  const last = lastNames[randomInt(0, lastNames.length - 1)];
+  const first = namesEmailFirst[randomInt(0, namesEmailFirst.length - 1)];
+  const last = namesEmailLast[randomInt(0, namesEmailLast.length - 1)];
   let domain = "company.ru";
   if (useCustomDomain && domainOverride && domainOverride.trim()) {
     domain = domainOverride.trim();
@@ -467,326 +270,7 @@ const generateNames = (
   format: string = "full_fio",
   gender: string = "any",
 ): string => {
-  // Словари русских имён, фамилий и отчеств
-  const maleFirstNames = [
-    "Александр",
-    "Алексей",
-    "Андрей",
-    "Артём",
-    "Владимир",
-    "Дмитрий",
-    "Евгений",
-    "Иван",
-    "Максим",
-    "Михаил",
-    "Николай",
-    "Павел",
-    "Пётр",
-    "Сергей",
-    "Степан",
-    "Фёдор",
-    "Юрий",
-    "Ярослав",
-    "Борис",
-    "Василий",
-    "Георгий",
-    "Даниил",
-    "Егор",
-    "Захар",
-    "Игорь",
-    "Кирилл",
-    "Леонид",
-    "Матвей",
-    "Назар",
-    "Олег",
-    "Роман",
-    "Семён",
-    "Тимофей",
-    "Ульяна",
-    "Филипп",
-    "Харитон",
-    "Цезарь",
-    "Чеслав",
-    "Шамиль",
-    "Эдуард",
-    "Юлиан",
-    "Яков",
-    "Анатолий",
-    "Богдан",
-    "Виталий",
-    "Геннадий",
-    "Денис",
-    "Елисей",
-    "Ждан",
-    "Зиновий",
-  ];
-
-  const femaleFirstNames = [
-    "Александра",
-    "Алина",
-    "Анна",
-    "Валентина",
-    "Валерия",
-    "Вера",
-    "Виктория",
-    "Галина",
-    "Дарья",
-    "Евгения",
-    "Екатерина",
-    "Елена",
-    "Елизавета",
-    "Жанна",
-    "Зинаида",
-    "Инна",
-    "Ирина",
-    "Клавдия",
-    "Лариса",
-    "Любовь",
-    "Марина",
-    "Мария",
-    "Надежда",
-    "Наталья",
-    "Нина",
-    "Оксана",
-    "Ольга",
-    "Полина",
-    "Раиса",
-    "Светлана",
-    "Тамара",
-    "Татьяна",
-    "Ульяна",
-    "Фаина",
-    "Христина",
-    "Цветана",
-    "Чулпан",
-    "Шарифа",
-    "Эльвира",
-    "Юлия",
-    "Яна",
-    "Ангелина",
-    "Богдана",
-    "Василиса",
-    "Варвара",
-    "Глафира",
-    "Диана",
-    "Евдокия",
-    "Жанетта",
-    "Злата",
-  ];
-
-  const maleLastNames = [
-    "Иванов",
-    "Петров",
-    "Сидоров",
-    "Смирнов",
-    "Кузнецов",
-    "Попов",
-    "Васильев",
-    "Соколов",
-    "Михайлов",
-    "Новиков",
-    "Фёдоров",
-    "Морозов",
-    "Волков",
-    "Алексеев",
-    "Лебедев",
-    "Семёнов",
-    "Егоров",
-    "Павлов",
-    "Козлов",
-    "Степанов",
-    "Николаев",
-    "Орлов",
-    "Андреев",
-    "Макаров",
-    "Никитин",
-    "Захаров",
-    "Зайцев",
-    "Соловьёв",
-    "Борисов",
-    "Яковлев",
-    "Григорьев",
-    "Романов",
-    "Воробьёв",
-    "Сергеев",
-    "Кузьмин",
-    "Максимов",
-    "Филиппов",
-    "Власов",
-    "Титов",
-    "Семёнов",
-    "Чернов",
-    "Абрамов",
-    "Мартынов",
-    "Ефимов",
-    "Денисов",
-    "Беляев",
-    "Терентьев",
-    "Молчанов",
-    "Рыбаков",
-    "Субботин",
-  ];
-
-  const femaleLastNames = [
-    "Иванова",
-    "Петрова",
-    "Сидорова",
-    "Смирнова",
-    "Кузнецова",
-    "Попова",
-    "Васильева",
-    "Соколова",
-    "Михайлова",
-    "Новикова",
-    "Фёдорова",
-    "Морозова",
-    "Волкова",
-    "Алексеева",
-    "Лебедева",
-    "Семёнова",
-    "Егорова",
-    "Павлова",
-    "Козлова",
-    "Степанова",
-    "Николаева",
-    "Орлова",
-    "Андреева",
-    "Макарова",
-    "Никитина",
-    "Захарова",
-    "Зайцева",
-    "Соловьёва",
-    "Борисова",
-    "Яковлева",
-    "Григорьева",
-    "Романова",
-    "Воробьёва",
-    "Сергеева",
-    "Кузьмина",
-    "Максимова",
-    "Филиппова",
-    "Власова",
-    "Титова",
-    "Семёнова",
-    "Чернова",
-    "Абрамова",
-    "Мартынова",
-    "Ефимова",
-    "Денисова",
-    "Беляева",
-    "Терентьева",
-    "Молчанова",
-    "Рыбакова",
-    "Субботина",
-  ];
-
-  const malePatronymics = [
-    "Александрович",
-    "Алексеевич",
-    "Андреевич",
-    "Артёмович",
-    "Владимирович",
-    "Дмитриевич",
-    "Евгеньевич",
-    "Иванович",
-    "Максимович",
-    "Михайлович",
-    "Николаевич",
-    "Павлович",
-    "Петрович",
-    "Сергеевич",
-    "Степанович",
-    "Фёдорович",
-    "Юрьевич",
-    "Ярославович",
-    "Борисович",
-    "Васильевич",
-    "Георгиевич",
-    "Даниилович",
-    "Егорович",
-    "Захарович",
-    "Игоревич",
-    "Кириллович",
-    "Леонидович",
-    "Матвеевич",
-    "Назарович",
-    "Олегович",
-    "Романович",
-    "Семёнович",
-    "Тимофеевич",
-    "Ульянович",
-    "Филиппович",
-    "Харитонович",
-    "Цезаревич",
-    "Чеславович",
-    "Шамилевич",
-    "Эдуардович",
-    "Юлианович",
-    "Яковлевич",
-    "Анатольевич",
-    "Богданович",
-    "Витальевич",
-    "Геннадиевич",
-    "Денисович",
-    "Елисеевич",
-    "Жданович",
-    "Зиновьевич",
-  ];
-
-  const femalePatronymics = [
-    "Александровна",
-    "Алексеевна",
-    "Андреевна",
-    "Артёмовна",
-    "Владимировна",
-    "Дмитриевна",
-    "Евгеньевна",
-    "Ивановна",
-    "Максимовна",
-    "Михайловна",
-    "Николаевна",
-    "Павловна",
-    "Петровна",
-    "Сергеевна",
-    "Степановна",
-    "Фёдоровна",
-    "Юрьевна",
-    "Ярославовна",
-    "Борисовна",
-    "Васильевна",
-    "Георгиевна",
-    "Данииловна",
-    "Егоровна",
-    "Захаровна",
-    "Игоревна",
-    "Кирилловна",
-    "Леонидовна",
-    "Матвеевна",
-    "Назаровна",
-    "Олеговна",
-    "Романовна",
-    "Семёновна",
-    "Тимофеевна",
-    "Ульяновна",
-    "Филипповна",
-    "Харитоновна",
-    "Цезаревна",
-    "Чеславовна",
-    "Шамилевна",
-    "Эдуардовна",
-    "Юлиановна",
-    "Яковлевна",
-    "Анатольевна",
-    "Богдановна",
-    "Витальевна",
-    "Геннадиевна",
-    "Денисовна",
-    "Елисеевна",
-    "Ждановна",
-    "Зиновьевна",
-  ];
-
-  // Определяем пол для генерации
+   // Определяем пол для генерации
   let actualGender = gender;
   if (gender === "any") {
     actualGender = Math.random() < 0.5 ? "male" : "female";
@@ -795,18 +279,18 @@ const generateNames = (
   // Выбираем случайные элементы в зависимости от пола
   const firstName =
     actualGender === "male"
-      ? maleFirstNames[randomInt(0, maleFirstNames.length - 1)]
-      : femaleFirstNames[randomInt(0, femaleFirstNames.length - 1)];
+      ? namesRuMaleFirst[randomInt(0, namesRuMaleFirst.length - 1)]
+      : namesRuFemaleFirst[randomInt(0, namesRuFemaleFirst.length - 1)];
 
   const lastName =
     actualGender === "male"
-      ? maleLastNames[randomInt(0, maleLastNames.length - 1)]
-      : femaleLastNames[randomInt(0, femaleLastNames.length - 1)];
+      ? namesRuMaleLast[randomInt(0, namesRuMaleLast.length - 1)]
+      : namesRuFemaleLast[randomInt(0, namesRuFemaleLast.length - 1)];
 
   const patronymic =
     actualGender === "male"
-      ? malePatronymics[randomInt(0, malePatronymics.length - 1)]
-      : femalePatronymics[randomInt(0, femalePatronymics.length - 1)];
+      ? namesRUFemalePatronymics[randomInt(0, namesRUFemalePatronymics.length - 1)]
+      : namesRUMalePatronymics[randomInt(0, namesRUMalePatronymics.length - 1)];
 
   // Получаем инициалы
   const firstInitial = firstName.charAt(0) + ".";
@@ -896,6 +380,32 @@ function collectSelectedTextNodes(): TextNode[] {
   return result;
 }
 
+async function loadFontsForNode(node: TextNode): Promise<void> {
+  const len = node.characters.length;
+  if (len === 0) {
+    if (node.fontName !== figma.mixed) {
+      await figma.loadFontAsync(node.fontName as FontName);
+    }
+    return;
+  }
+  if (node.fontName !== figma.mixed) {
+    await figma.loadFontAsync(node.fontName as FontName);
+    return;
+  }
+  let i = 0;
+  while (i < len) {
+    const fn = node.getRangeFontName(i, i + 1);
+    if (fn !== figma.mixed) {
+      await figma.loadFontAsync(fn as FontName);
+      let j = i + 1;
+      while (j < len && node.getRangeFontName(j, j + 1) === fn) j++;
+      i = j;
+    } else {
+      i++;
+    }
+  }
+}
+
 const DEFAULT_FONT: FontName = { family: "Roboto", style: "Regular" };
 
 async function loadDefaultFont(): Promise<void> {
@@ -924,10 +434,10 @@ async function applyCollectionToSelection(
   const textNodes = collectSelectedTextNodes();
   if (textNodes.length === 0) return 0;
 
-  await loadDefaultFont();
+  // Load actual fonts used in nodes to keep user font
   const gen = generatorById[collection];
   for (const node of textNodes) {
-    ensureWritableFont(node);
+    await loadFontsForNode(node);
     if (collection === "inn") {
       node.characters =
         payload?.innKind === "ul" ? generateInnUl() : generateInnFl();
@@ -985,3 +495,5 @@ figma.ui.onmessage = async (msg: UIMessage) => {
     }
   }
 };
+
+

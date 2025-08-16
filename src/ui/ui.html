@@ -9,57 +9,55 @@
     </style>
   </head>
   <body>
-    <label for="collection">Коллекция</label>
-    <div class="row">
+    <div class="row collection-row">
       <select id="collection" class="widget-select"></select>
       <button id="apply" class="widget-btn">Применить</button>
     </div>
 
     <!-- Email (домен) -->
-    <div class="row" id="domainRow" style="margin-top: 8px; display: none; align-items: center; gap: 8px">
-      <label style="margin: 0; display: flex; align-items: center; gap: 6px">
-        <input type="checkbox" id="corpDomainMode" style="margin-right: 4px" />
+    <div class="row" id="domainRow">
+      <label>
+        <input type="checkbox" id="corpDomainMode" />
         Пользовательский домен
       </label>
-      <label for="domain" style="margin: 0">Домен:</label>
       <input id="domain" type="text" value="company.ru" placeholder="company.ru" maxlength="20" />
-      <div style="font-size: 11px; color: #666; margin-top: -4px">до 20 символов</div>
+      <div class="note-text"> до 20 символов</div>
     </div>
 
     <!-- ИНН -->
-    <div class="row" id="innRow" style="margin-top: 8px; display: none; gap: 12px">
+    <div class="row" id="innRow">
       <span>Тип ИНН:</span>
       <label><input type="radio" name="innKind" value="fl" checked /> ФЛ (12)</label>
       <label><input type="radio" name="innKind" value="ul" /> ЮЛ (10)</label>
     </div>
 
     <!-- Телефон -->
-    <div id="phoneRow" style="margin-top: 8px; display: none">
-      <div style="font-weight: 600; margin-bottom: 6px">Формат телефона</div>
-      <label style="display: block; margin: 2px 0">
+    <div id="phoneRow">
+      <div>Формат телефона</div>
+      <label>
         <input type="radio" name="phoneFormat" value="space_dash" checked />
         +7 xxx xxx-xx-xx
       </label>
-      <label style="display: block; margin: 2px 0">
+      <label>
         <input type="radio" name="phoneFormat" value="paren_dash" />
         +7 (xxx) xxx-xx-xx
       </label>
-      <label style="display: block; margin: 2px 0">
+      <label>
         <input type="radio" name="phoneFormat" value="plain_space" />
         +7 xxx xxx xx xx
       </label>
     </div>
 
     <!-- Финансы -->
-    <div id="financeRow" style="margin-top: 8px; display: none">
-      <div style="font-weight: 600; margin-bottom: 6px">Формат суммы</div>
+    <div id="financeRow">
+      <div>Формат суммы</div>
       <div class="preview-box">
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px">Превью</div>
-        <div id="financePreview" style="font-size: 14px; font-weight: 600">37 273,50 ₽</div>
+        <div>Превью</div>
+        <div id="financePreview">37 273,50 ₽</div>
       </div>
-      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px">
-        <label style="display: flex; align-items: center; gap: 6px">
-          <span style="font-size: 12px">Знаков после запятой:</span>
+      <div>
+        <label>
+          <span>Знаков после запятой:</span>
           <select id="decimalPlaces" class="widget-select">
             <option value="0">0</option>
             <option value="1">1</option>
@@ -70,11 +68,11 @@
     </div>
 
     <!-- Время -->
-    <div id="timeRow" style="margin-top: 8px; display: none">
-      <div style="font-weight: 600; margin-bottom: 6px">Формат времени</div>
+    <div id="timeRow">
+      <div>Формат времени</div>
       <div class="preview-box">
-        <div style="font-size: 11px; color: #666; margin-bottom: 4px">Превью</div>
-        <div id="timePreview" style="font-size: 14px; font-weight: 600">09:05</div>
+        <div>Превью</div>
+        <div id="timePreview">09:05</div>
       </div>
       <div>
         <label for="timeFormat">Формат:</label>
@@ -98,11 +96,11 @@
     </div>
 
     <!-- Имена -->
-    <div id="namesRow" style="margin-top: 8px; display: none">
-      <div style="font-weight: 600; margin-bottom: 6px">Формат</div>
-      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px">
-        <label style="display: flex; align-items: center; gap: 6px">
-          <span style="font-size: 12px">Формат имени:</span>
+    <div id="namesRow">
+      <div>Формат</div>
+      <div>
+        <label>
+          <span>Формат имени:</span>
           <select id="namesFormat" class="widget-select">
             <option value="full_fio" selected>Фамилия Имя Отчество</option>
             <option value="last_first">Фамилия Имя</option>
@@ -113,7 +111,7 @@
           </select>
         </label>
       </div>
-      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px">
+      <div>
         <span>Пол:</span>
         <label><input type="radio" name="namesGender" value="any" checked /> Любой</label>
         <label><input type="radio" name="namesGender" value="male" /> Мужской</label>
@@ -122,9 +120,9 @@
     </div>
 
     <!-- Числа -->
-    <div class="row" id="numbersRow" style="margin-top: 8px; display: none; align-items: center; gap: 8px">
-      <label style="margin: 0; display: flex; align-items: center; gap: 6px">
-        <input type="checkbox" id="numbersDecimal" style="margin-right: 4px" />
+    <div class="row" id="numbersRow">
+      <label>
+        <input type="checkbox" id="numbersDecimal" />
         Десятичное число (1–10)
       </label>
     </div>
@@ -139,3 +137,4 @@
     </script>
   </body>
   </html>
+
