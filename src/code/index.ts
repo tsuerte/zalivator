@@ -1,16 +1,17 @@
 import uiHtml from "../ui/ui.html?raw";
 import stylesCss from "../ui/styles.css?raw";
 import mainJs from "../ui/main.js?raw";
-import numbersJs from "../ui/numbers.js?raw";
+// numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
 import { corpDomains } from "../data/corp";
+import { generateNumber } from "./generators/numbers";
 import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, namesRuMaleLast, namesRuFemaleLast, namesRUFemalePatronymics, namesRUMalePatronymics } from "../data/names";
 
 // Собираем строку HTML с инъекцией стилей и скриптов
 let uiString: string = String(uiHtml);
 uiString = uiString.replace("/*__INJECT_STYLES__*/", String(stylesCss));
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
-uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", String(numbersJs));
+uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
 figma.showUI(uiString, { width: 520, height: 520 });
 
 // Генератор российских госномеров перенесён в отдельный модуль

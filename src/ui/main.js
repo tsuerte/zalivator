@@ -328,6 +328,10 @@
       const format = namesFormat.value;
       const gender = getSelectedNamesGender();
       parent.postMessage({ pluginMessage: { type: "apply", collection, namesFormat: format, namesGender: gender } }, "*");
+    } else if (collection === "numbers") {
+      const decimalEl = document.getElementById("numbersDecimal");
+      const numbersDecimal = !!(decimalEl && decimalEl.checked);
+      parent.postMessage({ pluginMessage: { type: "apply", collection, numbersDecimal } }, "*");
     } else {
       parent.postMessage({ pluginMessage: { type: "apply", collection } }, "*");
     }
