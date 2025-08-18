@@ -4,7 +4,7 @@ import mainJs from "../ui/main.js?raw";
 // numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
 import { corpDomains } from "../data/corp";
-import { generateNumber } from "./generators/numbers";
+import { generateNumber as genNumber } from "./generators/numbers";
 import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, namesRuMaleLast, namesRuFemaleLast, namesRUFemalePatronymics, namesRUMalePatronymics } from "../data/names";
 
 // Собираем строку HTML с инъекцией стилей и скриптов
@@ -35,15 +35,15 @@ type UIMessage =
       collection: CollectionId;
       domain?: string;
       useCustomDomain?: boolean;
-      innKind?: "fl" | "ul";
-      phoneFormat?: PhoneFormatId;
-      decimalPlaces?: number;
-      timeFormat?: string;
-      namesFormat?: string;
-      namesGender?: string;
-      numbersDecimal?: boolean;
-      numbersMin?: number;
-      numbersMax?: number;
+    innKind?: "fl" | "ul";
+    phoneFormat?: PhoneFormatId;
+    decimalPlaces?: number;
+    timeFormat?: string;
+    namesFormat?: string;
+    namesGender?: string;
+    numbersDecimal?: boolean;
+    numbersMin?: number;
+    numbersMax?: number;
     };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
@@ -344,16 +344,8 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
   names: (fmt?: string) => generateNames(fmt || "full_fio", "any"),
   rus_plate: () => generateRusPlate(),
   numbers: (isDec?: boolean, min?: number, max?: number) =>
-    generateNumber({ decimal: Boolean(isDec), min, max }),
+    genNumber({ decimal: Boolean(isDec), min, max }),
 };
-
-function generateNumber(isDecimal: boolean): string {
-  if (!isDecimal) {
-    return String(randomInt(1, 10));
-  }
-  const value = 1 + Math.random() * 9; // [1;10)
-  return value.toFixed(2); // десятичное число с 2 знаками
-}
 
 function collectSelectedTextNodes(): TextNode[] {
   const result: TextNode[] = [];
@@ -419,6 +411,8 @@ async function applyCollectionToSelection(
     namesFormat?: string;
     namesGender?: string;
     numbersDecimal?: boolean;
+    numbersMin?: number;
+    numbersMax?: number;
   },
 ): Promise<number> {
   const textNodes = collectSelectedTextNodes();
@@ -443,7 +437,7 @@ async function applyCollectionToSelection(
         payload?.namesGender,
       );
     } else if (collection === "numbers") {
-      node.characters = generateNumber({
+      node.characters = genNumber({
         decimal: Boolean(payload?.numbersDecimal),
         min: payload?.numbersMin,
         max: payload?.numbersMax,
@@ -480,6 +474,8 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       namesFormat: msg.namesFormat,
       namesGender: msg.namesGender,
       numbersDecimal: msg.numbersDecimal,
+      numbersMin: msg.numbersMin,
+      numbersMax: msg.numbersMax,
     });
     figma.ui.postMessage({ type: "applied", count } as any);
     if (count === 0) {
