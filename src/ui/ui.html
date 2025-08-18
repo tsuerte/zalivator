@@ -9,125 +9,131 @@
     </style>
   </head>
   <body>
-    <div class="row collection-row">
-      <select id="collection" class="widget-select"></select>
-      <button id="apply" class="widget-btn">Применить</button>
-    </div>
+    <div class="plugin-container">
+      <aside class="collections">
+        <!-- Скрытый select для совместимости со скриптами -->
+        <select id="collection" class="widget-select" style="display: none;"></select>
+        <ul id="collectionList" class="collection-list"></ul>
+      </aside>
+      <main class="collection-container">
+        <div class="collection-content">
+          <div class="props-preview">
+            <div class="preview-label">Превью</div>
+            <div class="preview-value" id="previewValue"></div>
+          </div>
+          <div class="collection-props">
+            <!-- Email (домен) -->
+            <div class="row" id="domainRow">
+              <label>
+                <input type="checkbox" id="corpDomainMode" />
+                Пользовательский домен
+              </label>
+              <input id="domain" type="text" value="company.ru" placeholder="company.ru" maxlength="20" />
+              <div class="note-text"> до 20 символов</div>
+            </div>
 
-    <!-- Email (домен) -->
-    <div class="row" id="domainRow">
-      <label>
-        <input type="checkbox" id="corpDomainMode" />
-        Пользовательский домен
-      </label>
-      <input id="domain" type="text" value="company.ru" placeholder="company.ru" maxlength="20" />
-      <div class="note-text"> до 20 символов</div>
-    </div>
+            <!-- ИНН -->
+            <div class="row" id="innRow">
+              <span>Тип ИНН:</span>
+              <label><input type="radio" name="innKind" value="fl" checked /> ФЛ (12)</label>
+              <label><input type="radio" name="innKind" value="ul" /> ЮЛ (10)</label>
+            </div>
 
-    <!-- ИНН -->
-    <div class="row" id="innRow">
-      <span>Тип ИНН:</span>
-      <label><input type="radio" name="innKind" value="fl" checked /> ФЛ (12)</label>
-      <label><input type="radio" name="innKind" value="ul" /> ЮЛ (10)</label>
-    </div>
+            <!-- Телефон -->
+            <div id="phoneRow">
+              <div>Формат телефона</div>
+              <label>
+                <input type="radio" name="phoneFormat" value="space_dash" checked />
+                +7 xxx xxx-xx-xx
+              </label>
+              <label>
+                <input type="radio" name="phoneFormat" value="paren_dash" />
+                +7 (xxx) xxx-xx-xx
+              </label>
+              <label>
+                <input type="radio" name="phoneFormat" value="plain_space" />
+                +7 xxx xxx xx xx
+              </label>
+            </div>
 
-    <!-- Телефон -->
-    <div id="phoneRow">
-      <div>Формат телефона</div>
-      <label>
-        <input type="radio" name="phoneFormat" value="space_dash" checked />
-        +7 xxx xxx-xx-xx
-      </label>
-      <label>
-        <input type="radio" name="phoneFormat" value="paren_dash" />
-        +7 (xxx) xxx-xx-xx
-      </label>
-      <label>
-        <input type="radio" name="phoneFormat" value="plain_space" />
-        +7 xxx xxx xx xx
-      </label>
-    </div>
+          <!-- Финансы -->
+          <div id="financeRow">
+            <div>Формат суммы</div>
+            <div>
+              <label>
+                <span>Знаков после запятой:</span>
+                <select id="decimalPlaces" class="widget-select">
+                  <option value="0">0</option>
+                  <option value="1">1</option>
+                  <option value="2" selected>2</option>
+                </select>
+              </label>
+            </div>
+          </div>
 
-    <!-- Финансы -->
-    <div id="financeRow">
-      <div>Формат суммы</div>
-      <div class="preview-box">
-        <div>Превью</div>
-        <div id="financePreview">37 273,50 ₽</div>
-      </div>
-      <div>
-        <label>
-          <span>Знаков после запятой:</span>
-          <select id="decimalPlaces" class="widget-select">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2" selected>2</option>
-          </select>
-        </label>
-      </div>
-    </div>
+          <!-- Время -->
+          <div id="timeRow">
+            <div>Формат времени</div>
+            <div>
+              <label for="timeFormat">Формат:</label>
+              <select id="timeFormat" class="widget-select">
+                <option value="digital_hhmm" selected>09:05</option>
+                <option value="digital_hhmmss">09:05:07</option>
+                <option value="units_hhmm">9 ч 5 м</option>
+                <option value="units_hhmmss">9 ч 5 м 7 с</option>
+                <option value="units_hh">9 ч</option>
+                <option value="units_mmss">5 м 7 с</option>
+                <option value="text_hhmm">9 часов 5 минут</option>
+                <option value="text_hhmmss">9 часов 5 минут 7 секунд</option>
+                <option value="text_hh">9 часов</option>
+                <option value="text_mmss">5 минут 7 секунд</option>
+                <option value="timer_mmss">05:07</option>
+                <option value="timer_mss">5:07</option>
+                <option value="timer_mmss_hundredths">05:07,32</option>
+                <option value="timer_mmss_milliseconds">05:07,325</option>
+              </select>
+            </div>
+          </div>
 
-    <!-- Время -->
-    <div id="timeRow">
-      <div>Формат времени</div>
-      <div class="preview-box">
-        <div>Превью</div>
-        <div id="timePreview">09:05</div>
-      </div>
-      <div>
-        <label for="timeFormat">Формат:</label>
-        <select id="timeFormat" class="widget-select">
-          <option value="digital_hhmm" selected>09:05</option>
-          <option value="digital_hhmmss">09:05:07</option>
-          <option value="units_hhmm">9 ч 5 м</option>
-          <option value="units_hhmmss">9 ч 5 м 7 с</option>
-          <option value="units_hh">9 ч</option>
-          <option value="units_mmss">5 м 7 с</option>
-          <option value="text_hhmm">9 часов 5 минут</option>
-          <option value="text_hhmmss">9 часов 5 минут 7 секунд</option>
-          <option value="text_hh">9 часов</option>
-          <option value="text_mmss">5 минут 7 секунд</option>
-          <option value="timer_mmss">05:07</option>
-          <option value="timer_mss">5:07</option>
-          <option value="timer_mmss_hundredths">05:07,32</option>
-          <option value="timer_mmss_milliseconds">05:07,325</option>
-        </select>
-      </div>
-    </div>
+            <!-- Имена -->
+            <div id="namesRow">
+              <div>Формат</div>
+              <div>
+                <label>
+                  <span>Формат имени:</span>
+                  <select id="namesFormat" class="widget-select">
+                    <option value="full_fio" selected>Фамилия Имя Отчество</option>
+                    <option value="last_first">Фамилия Имя</option>
+                    <option value="first_last">Имя Фамилия</option>
+                    <option value="last_initials">Фамилия И. О.</option>
+                    <option value="initials_last">И. О. Фамилия</option>
+                    <option value="last_first_initial">Фамилия И.</option>
+                  </select>
+                </label>
+              </div>
+              <div>
+                <span>Пол:</span>
+                <label><input type="radio" name="namesGender" value="any" checked /> Любой</label>
+                <label><input type="radio" name="namesGender" value="male" /> Мужской</label>
+                <label><input type="radio" name="namesGender" value="female" /> Женский</label>
+              </div>
+            </div>
 
-    <!-- Имена -->
-    <div id="namesRow">
-      <div>Формат</div>
-      <div>
-        <label>
-          <span>Формат имени:</span>
-          <select id="namesFormat" class="widget-select">
-            <option value="full_fio" selected>Фамилия Имя Отчество</option>
-            <option value="last_first">Фамилия Имя</option>
-            <option value="first_last">Имя Фамилия</option>
-            <option value="last_initials">Фамилия И. О.</option>
-            <option value="initials_last">И. О. Фамилия</option>
-            <option value="last_first_initial">Фамилия И.</option>
-          </select>
-        </label>
-      </div>
-      <div>
-        <span>Пол:</span>
-        <label><input type="radio" name="namesGender" value="any" checked /> Любой</label>
-        <label><input type="radio" name="namesGender" value="male" /> Мужской</label>
-        <label><input type="radio" name="namesGender" value="female" /> Женский</label>
-      </div>
+            <!-- Числа -->
+            <div class="row" id="numbersRow">
+              <label>
+                <input type="checkbox" id="numbersDecimal" />
+                Десятичное число (1–10)
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="footer">
+          <div id="log"></div>
+          <button id="apply" class="btn-primary">Применить</button>
+        </div>
+      </main>
     </div>
-
-    <!-- Числа -->
-    <div class="row" id="numbersRow">
-      <label>
-        <input type="checkbox" id="numbersDecimal" />
-        Десятичное число (1–10)
-      </label>
-    </div>
-
-    <div id="log"></div>
 
     <script>
       //__INJECT_MAIN_SCRIPT__

@@ -11,7 +11,7 @@ let uiString: string = String(uiHtml);
 uiString = uiString.replace("/*__INJECT_STYLES__*/", String(stylesCss));
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", String(numbersJs));
-figma.showUI(uiString, { width: 400, height: 360 });
+figma.showUI(uiString, { width: 520, height: 520 });
 
 // Генератор российских госномеров (легковой/грузовой)
 
