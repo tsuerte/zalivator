@@ -164,3 +164,29 @@ html, body {
   font-size: 11px;
   color: #666;
 }
+
+/* Inputs: standard text field */
+.collection-props input[type="text"],
+.collection-props input[type="email"],
+.collection-props input[type="number"],
+.collection-props input[type="search"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px; /* 6 + 16 + 6 = 28px total with shadow border */
+  background: #ffffff;
+  border: none; /* use inset shadow as inside border */
+  box-shadow: inset 0 0 0 1px #cccccc;
+  color: #161616;
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 400;
+  border-radius: 5px;
+}
+
+/* If input is direct child of a row, allow it to span full width */
+.collection-props .row > input[type="text"],
+.collection-props .row > input[type="email"],
+.collection-props .row > input[type="number"],
+.collection-props .row > input[type="search"] {
+  flex: 1 1 100%;
+}
