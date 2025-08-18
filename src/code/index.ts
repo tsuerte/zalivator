@@ -42,6 +42,8 @@ type UIMessage =
       namesFormat?: string;
       namesGender?: string;
       numbersDecimal?: boolean;
+      numbersMin?: number;
+      numbersMax?: number;
     };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
@@ -341,7 +343,8 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
   time: (fmt?: string) => generateTime(fmt || "digital_hhmm"),
   names: (fmt?: string) => generateNames(fmt || "full_fio", "any"),
   rus_plate: () => generateRusPlate(),
-  numbers: (isDec?: boolean) => generateNumber(Boolean(isDec)),
+  numbers: (isDec?: boolean, min?: number, max?: number) =>
+    generateNumber({ decimal: Boolean(isDec), min, max }),
 };
 
 function generateNumber(isDecimal: boolean): string {
@@ -440,7 +443,11 @@ async function applyCollectionToSelection(
         payload?.namesGender,
       );
     } else if (collection === "numbers") {
-      node.characters = generateNumber(Boolean(payload?.numbersDecimal));
+      node.characters = generateNumber({
+        decimal: Boolean(payload?.numbersDecimal),
+        min: payload?.numbersMin,
+        max: payload?.numbersMax,
+      });
     } else if (collection === "corp_email") {
       node.characters = generateCorpEmail(
         payload?.domain,

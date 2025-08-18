@@ -25,6 +25,8 @@
   const namesGenderRadios = document.querySelectorAll('input[name="namesGender"]');
   const phoneFormatRadios = document.querySelectorAll('input[name="phoneFormat"]');
   const previewValueEl = document.getElementById("previewValue");
+  const numbersMinEl = document.getElementById("numbersMin");
+  const numbersMaxEl = document.getElementById("numbersMax");
   // --- Preview helpers
   function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -123,7 +125,16 @@
     } else if (val === "numbers") {
       const decimal = document.getElementById("numbersDecimal");
       const isDec = decimal && decimal.checked;
-      preview = isDec ? `${randInt(1,10)},${randInt(0,9)}` : `${randInt(1,10)}`;
+      const MAX = 1000000000;
+      let min = numbersMinEl && numbersMinEl.value !== "" ? parseInt(numbersMinEl.value, 10) : 0;
+      let max = numbersMaxEl && numbersMaxEl.value !== "" ? parseInt(numbersMaxEl.value, 10) : 0;
+      if (isNaN(min)) min = 0;
+      if (isNaN(max)) max = 0;
+      min = Math.min(Math.max(Math.floor(min), 0), MAX);
+      max = Math.min(Math.max(Math.floor(max), 0), MAX);
+      if (min > max) { const t = min; min = max; max = t; }
+      const value = randInt(min, max);
+      preview = isDec ? `${value},${randInt(0,9)}` : `${value}`;
     } else if (val === "passport_ru") {
       preview = `${pad(randInt(0,9999),4)} ${pad(randInt(0,999999),6)}`;
     } else if (val === "snils") {
@@ -290,6 +301,10 @@
   decimalPlacesRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
+  if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
+  if (numbersMaxEl) numbersMaxEl.addEventListener("input", updateGlobalPreview);
+  if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
+  if (numbersMaxEl) numbersMaxEl.addEventListener("input", updateGlobalPreview);
   const innKindRadios = document.querySelectorAll('input[name="innKind"]');
   innKindRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
 
@@ -331,7 +346,9 @@
     } else if (collection === "numbers") {
       const decimalEl = document.getElementById("numbersDecimal");
       const numbersDecimal = !!(decimalEl && decimalEl.checked);
-      parent.postMessage({ pluginMessage: { type: "apply", collection, numbersDecimal } }, "*");
+      const min = numbersMinEl && numbersMinEl.value !== "" ? parseInt(numbersMinEl.value, 10) : 0;
+      const max = numbersMaxEl && numbersMaxEl.value !== "" ? parseInt(numbersMaxEl.value, 10) : 0;
+      parent.postMessage({ pluginMessage: { type: "apply", collection, numbersDecimal, numbersMin: min, numbersMax: max } }, "*");
     } else {
       parent.postMessage({ pluginMessage: { type: "apply", collection } }, "*");
     }
