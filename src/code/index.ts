@@ -2,7 +2,7 @@ import uiHtml from "../ui/ui.html?raw";
 import stylesCss from "../ui/styles.css?raw";
 import mainJs from "../ui/main.js?raw";
 import numbersJs from "../ui/numbers.js?raw";
-import { RUS_PLATE_LETTERS, RUS_PLATE_REGIONS } from "../data/rusPlate";
+import { generateRusPlate } from "./generators/rusPlate";
 import { corpDomains } from "../data/corp";
 import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, namesRuMaleLast, namesRuFemaleLast, namesRUFemalePatronymics, namesRUMalePatronymics } from "../data/names";
 
@@ -13,21 +13,7 @@ uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", String(numbersJs));
 figma.showUI(uiString, { width: 520, height: 520 });
 
-// Генератор российских госномеров (легковой/грузовой)
-
-function pick<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-export function generateRusPlate() {
-  // Формат: Б ддд ББ RR (например, А123ВС777)
-  const L1 = pick(RUS_PLATE_LETTERS);
-  const D = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
-  const L2 = pick(RUS_PLATE_LETTERS);
-  const L3 = pick(RUS_PLATE_LETTERS);
-  const R = pick(RUS_PLATE_REGIONS);
-  return `${L1}${D}${L2}${L3}${R}`;
-}
+// Генератор российских госномеров перенесён в отдельный модуль
 type CollectionId =
   | "inn"
   | "kpp"

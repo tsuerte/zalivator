@@ -17,7 +17,8 @@
   const namesRow = document.getElementById("namesRow");
   const numbersRow = document.getElementById("numbersRow");
 
-  const decimalPlaces = document.getElementById("decimalPlaces");
+  // Финансы: замена select на радио-кнопки
+  const decimalPlacesRadios = document.querySelectorAll('input[name="decimalPlaces"]');
   const timeFormat = document.getElementById("timeFormat");
 
   const namesFormat = document.getElementById("namesFormat");
@@ -56,7 +57,8 @@
     const val = collectionSelect && collectionSelect.value;
     let preview = "";
     if (val === "finance") {
-      const places = decimalPlaces ? parseInt(decimalPlaces.value) : 2;
+      const dpEl = document.querySelector('input[name="decimalPlaces"]:checked');
+      const places = dpEl ? parseInt(dpEl.value) : 2;
       const amount = randInt(1000, 999999) + Math.random();
       preview = `${formatThousands(amount, places)} ₽`;
     } else if (val === "time") {
@@ -148,6 +150,15 @@
     else el.classList.add("hidden");
   }
 
+  function updateDomainRow() {
+    const isCorpEmail = collectionSelect && collectionSelect.value === "corp_email";
+    const innerVisible = isCorpEmail && corpDomainMode && corpDomainMode.checked;
+    setVisible(domainInput, innerVisible);
+    if (domainLabel) setVisible(domainLabel, innerVisible);
+    const note = domainRow ? domainRow.querySelector(".note-text") : null;
+    if (note) setVisible(note, innerVisible);
+  }
+
   function updateVisibility() {
     const val = collectionSelect.value;
 
@@ -195,8 +206,7 @@
       updateVisibility();
     }
     markActiveListItem(id);
-    updateFinancePreview();
-    updateTimePreview();
+    updateGlobalPreview();
   }
 
   function buildCollectionList(items) {
@@ -270,13 +280,14 @@
     updateDomainRow();
     updateGlobalPreview();
   };
-  if (decimalPlaces) decimalPlaces.onchange = () => { updateGlobalPreview(); };
+  // decimalPlaces select removed; radios handle change events above
   if (timeFormat) timeFormat.onchange = () => { updateGlobalPreview(); };
   if (corpDomainMode) corpDomainMode.addEventListener("change", () => { updateDomainRow(); updateGlobalPreview(); });
   if (domainInput) domainInput.addEventListener("input", updateGlobalPreview);
   if (namesFormat) namesFormat.addEventListener("change", updateGlobalPreview);
   namesGenderRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   phoneFormatRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
+  decimalPlacesRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
   const innKindRadios = document.querySelectorAll('input[name="innKind"]');
@@ -284,6 +295,7 @@
 
   // Initialize hidden state early
   updateVisibility();
+  updateGlobalPreview();
   updateGlobalPreview();
 
   // Применение
@@ -306,7 +318,8 @@
       const phoneFormat = checked ? checked.value : "paren_dash";
       parent.postMessage({ pluginMessage: { type: "apply", collection, phoneFormat } }, "*");
     } else if (collection === "finance") {
-      const places = parseInt(decimalPlaces.value);
+      const dpEl = document.querySelector('input[name="decimalPlaces"]:checked');
+      const places = dpEl ? parseInt(dpEl.value) : 2;
       parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places } }, "*");
     } else if (collection === "time") {
       const format = timeFormat.value;
