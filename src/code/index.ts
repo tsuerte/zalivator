@@ -3,6 +3,7 @@ import stylesCss from "../ui/styles.css?raw";
 import mainJs from "../ui/main.js?raw";
 // numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
+import { generatePhoneRu } from "./generators/phoneRu";
 import { corpDomains } from "../data/corp";
 import { generateNumber as genNumber } from "./generators/numbers";
 import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, namesRuMaleLast, namesRuFemaleLast, namesRUFemalePatronymics, namesRUMalePatronymics } from "../data/names";
@@ -12,7 +13,7 @@ let uiString: string = String(uiHtml);
 uiString = uiString.replace("/*__INJECT_STYLES__*/", String(stylesCss));
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
-figma.showUI(uiString, { width: 520, height: 520 });
+figma.showUI(uiString, { width: 570, height: 480 });
 
 // Генератор российских госномеров перенесён в отдельный модуль
 type CollectionId =
@@ -38,6 +39,7 @@ type UIMessage =
     innKind?: "fl" | "ul";
     phoneFormat?: PhoneFormatId;
     decimalPlaces?: number;
+    currency?: "RUB" | "USD" | "EUR";
     timeFormat?: string;
     namesFormat?: string;
     namesGender?: string;
@@ -150,21 +152,7 @@ const generateCorpEmail = (
   return `${first}.${last}@${domain}`;
 };
 
-const generatePhoneRu = (fmt: PhoneFormatId = "space_dash"): string => {
-  const p2 = randomInt(900, 999).toString();
-  const p3 = randomInt(100, 999).toString();
-  const p4 = randomInt(10, 99).toString();
-  const p5 = randomInt(10, 99).toString();
-  switch (fmt) {
-    case "space_dash":
-      return `+7 ${p2} ${p3}-${p4}-${p5}`;
-    case "plain_space":
-      return `+7 ${p2} ${p3} ${p4} ${p5}`;
-    case "paren_dash":
-    default:
-      return `+7 (${p2}) ${p3}-${p4}-${p5}`;
-  }
-};
+// generatePhoneRu moved to generators/phoneRu.ts
 
 const generateSnils = (): string => {
   const g1 = randomInt(100, 999).toString();
@@ -347,6 +335,38 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
     genNumber({ decimal: Boolean(isDec), min, max }),
 };
 
+// Расширенный генератор финансов с выбором валюты и локали форматирования
+const generateFinanceEx = (
+  decimalPlaces: number = 2,
+  currency: "RUB" | "USD" | "EUR" = "RUB",
+): string => {
+  // базовое число совпадает с generateFinance по диапазону
+  const whole = randomInt(1, 99999).toString();
+
+  const formatThousands = (num: string, groupSep: string): string => {
+    if (num.length <= 3) return num;
+    const parts: string[] = [];
+    for (let i = num.length; i > 0; i -= 3) {
+      parts.unshift(num.slice(Math.max(0, i - 3), i));
+    }
+    return parts.join(groupSep);
+  };
+
+  if (currency === "USD") {
+    const intPart = formatThousands(whole, ",");
+    if (decimalPlaces === 0) return "\u0024" + intPart;
+    if (decimalPlaces === 1) return "\u0024" + intPart + "." + randomInt(0, 9).toString();
+    return "\u0024" + intPart + "." + randomInt(0, 99).toString().padStart(2, "0");
+  }
+
+  // EUR и RUB формат одинаков, меняется только знак валюты
+  const intPart = formatThousands(whole, " ");
+  const sign = currency === "EUR" ? "€" : "₽";
+  if (decimalPlaces === 0) return `${intPart} ${sign}`;
+  if (decimalPlaces === 1) return `${intPart},${randomInt(0, 9)} ${sign}`;
+  return `${intPart},${randomInt(0, 99).toString().padStart(2, "0")} ${sign}`;
+};
+
 function collectSelectedTextNodes(): TextNode[] {
   const result: TextNode[] = [];
   const walk = (node: SceneNode) => {
@@ -407,6 +427,7 @@ async function applyCollectionToSelection(
     innKind?: "fl" | "ul";
     phoneFormat?: PhoneFormatId;
     decimalPlaces?: number;
+    currency?: "RUB" | "USD" | "EUR";
     timeFormat?: string;
     namesFormat?: string;
     namesGender?: string;
@@ -428,7 +449,7 @@ async function applyCollectionToSelection(
     } else if (collection === "phone_ru") {
       node.characters = generatePhoneRu(payload?.phoneFormat);
     } else if (collection === "finance") {
-      node.characters = generateFinance(payload?.decimalPlaces);
+      node.characters = generateFinanceEx(payload?.decimalPlaces, (payload?.currency as any) || "RUB");
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
     } else if (collection === "names") {
@@ -470,6 +491,7 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       innKind: msg.innKind,
       phoneFormat: msg.phoneFormat,
       decimalPlaces: msg.decimalPlaces,
+      currency: msg.currency,
       timeFormat: msg.timeFormat,
       namesFormat: msg.namesFormat,
       namesGender: msg.namesGender,

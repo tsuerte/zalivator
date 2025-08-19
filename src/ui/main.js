@@ -23,6 +23,7 @@
 
   const namesFormat = document.getElementById("namesFormat");
   const namesGenderRadios = document.querySelectorAll('input[name="namesGender"]');
+  const currencyRadios = document.querySelectorAll('input[name="currency"]');
   const phoneFormatRadios = document.querySelectorAll('input[name="phoneFormat"]');
   const previewValueEl = document.getElementById("previewValue");
   const numbersMinEl = document.getElementById("numbersMin");
@@ -36,6 +37,14 @@
     const parts = fixed.split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     return parts.join(places === 0 ? "" : ",");
+  }
+
+  // Универсальный форматтер с задаваемыми разделителями
+  function formatWithSeparators(num, places, groupSep, decimalSep) {
+    const fixed = places > 0 ? Number(num).toFixed(places) : Math.round(Number(num)).toString();
+    const parts = fixed.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, groupSep);
+    return places === 0 ? parts[0] : parts[0] + decimalSep + parts[1];
   }
   const RUS_LETTERS = Array.from("АВЕКМНОРСТУХ");
   const maleFirst = ["Иван", "Алексей", "Дмитрий", "Николай", "Сергей"];
@@ -61,8 +70,19 @@
     if (val === "finance") {
       const dpEl = document.querySelector('input[name="decimalPlaces"]:checked');
       const places = dpEl ? parseInt(dpEl.value) : 2;
+      const currencyEl = document.querySelector('input[name="currency"]:checked');
+      const currency = currencyEl ? currencyEl.value : "RUB";
       const amount = randInt(1000, 999999) + Math.random();
-      preview = `${formatThousands(amount, places)} ₽`;
+      if (currency === "USD") {
+        const f = formatWithSeparators(amount, places, ",", ".");
+        preview = '\u0024' + f; // безопасно вставляем знак доллара
+      } else if (currency === "EUR") {
+        const f = formatThousands(amount, places); // пробелы и запятая как у RUB
+        preview = `${f} €`;
+      } else { // RUB по умолчанию
+        const f = formatThousands(amount, places);
+        preview = `${f} ₽`;
+      }
     } else if (val === "time") {
       const fmt = timeFormat ? timeFormat.value : "digital_hhmm";
       const h = randInt(0, 23);
@@ -299,6 +319,7 @@
   namesGenderRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   phoneFormatRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   decimalPlacesRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
+  currencyRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
   if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
@@ -335,7 +356,9 @@
     } else if (collection === "finance") {
       const dpEl = document.querySelector('input[name="decimalPlaces"]:checked');
       const places = dpEl ? parseInt(dpEl.value) : 2;
-      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places } }, "*");
+      const curEl = document.querySelector('input[name="currency"]:checked');
+      const currency = curEl ? curEl.value : "RUB";
+      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency } }, "*");
     } else if (collection === "time") {
       const format = timeFormat.value;
       parent.postMessage({ pluginMessage: { type: "apply", collection, timeFormat: format } }, "*");

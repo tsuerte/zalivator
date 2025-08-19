@@ -34,9 +34,19 @@
 
             <!-- ИНН -->
             <div class="row" id="innRow">
-              <span>Тип ИНН:</span>
-              <label><input type="radio" name="innKind" value="fl" checked /> ФЛ (12)</label>
-              <label><input type="radio" name="innKind" value="ul" /> ЮЛ (10)</label>
+              <div class="vstack-fill">
+                <span class="radio-group-label">Тип ИНН:</span>
+                <div class="radio-group radio-group--fill" role="radiogroup" aria-label="Тип ИНН">
+                  <div class="radio">
+                    <input type="radio" id="innKind-fl" name="innKind" value="fl" checked />
+                    <label for="innKind-fl">Физлицо</label>
+                  </div>
+                  <div class="radio">
+                    <input type="radio" id="innKind-ul" name="innKind" value="ul" />
+                    <label for="innKind-ul">Юрлицо</label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Телефон -->
@@ -57,11 +67,40 @@
 
           <!-- Финансы -->
           <div id="financeRow">
-            <div>
-              <span>Знаков после запятой:</span>
-              <label><input type="radio" name="decimalPlaces" value="0" /> 0</label>
-              <label><input type="radio" name="decimalPlaces" value="1" /> 1</label>
-              <label><input type="radio" name="decimalPlaces" value="2" checked /> 2</label>
+            
+            <div class="vstack-fill">
+              <span class="radio-group-label">Валюта:</span>
+              <div class="radio-group radio-group--fill" role="radiogroup" aria-label="Валюта">
+                <div class="radio">
+                  <input type="radio" id="currency-rub" name="currency" value="RUB" checked />
+                  <label for="currency-rub">Рубль</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="currency-usd" name="currency" value="USD" />
+                  <label for="currency-usd">Доллар</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="currency-eur" name="currency" value="EUR" />
+                  <label for="currency-eur">Евро</label>
+                </div>
+              </div>
+            </div>
+            <div class="vstack-fill">
+              <span class="radio-group-label">Знаков после запятой:</span>
+              <div class="radio-group radio-group--fill" role="radiogroup" aria-label="Знаков после запятой">
+                <div class="radio">
+                  <input type="radio" id="decimalPlaces-0" name="decimalPlaces" value="0" />
+                  <label for="decimalPlaces-0">0</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="decimalPlaces-1" name="decimalPlaces" value="1" />
+                  <label for="decimalPlaces-1">1</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="decimalPlaces-2" name="decimalPlaces" value="2" checked />
+                  <label for="decimalPlaces-2">2</label>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -101,11 +140,22 @@
                   </select>
                 </label>
               </div>
-              <div>
-                <span>Пол:</span>
-                <label><input type="radio" name="namesGender" value="any" checked /> Любой</label>
-                <label><input type="radio" name="namesGender" value="male" /> Мужской</label>
-                <label><input type="radio" name="namesGender" value="female" /> Женский</label>
+              <div class="vstack-fill">
+                <span class="radio-group-label">Пол:</span>
+                <div class="radio-group radio-group--fill" role="radiogroup" aria-label="Пол">
+                  <div class="radio">
+                    <input type="radio" id="namesGender-any" name="namesGender" value="any" checked />
+                    <label for="namesGender-any">Любой</label>
+                  </div>
+                  <div class="radio">
+                    <input type="radio" id="namesGender-male" name="namesGender" value="male" />
+                    <label for="namesGender-male">Мужской</label>
+                  </div>
+                  <div class="radio">
+                    <input type="radio" id="namesGender-female" name="namesGender" value="female" />
+                    <label for="namesGender-female">Женский</label>
+                  </div>
+                </div>
               </div>
             </div>
 

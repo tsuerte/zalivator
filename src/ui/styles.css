@@ -29,10 +29,11 @@ html, body {
   flex-direction: column;
   min-width: 0;
   flex: 0 0 150px;
-  width: 150px;
-  border-right: 1px solid #e6e6e6;
-  padding: 10px 0; /* сверху/снизу по 10px */
-  box-sizing: border-box; /* ширина учитывает бордер */
+  width: 170px;
+  border: none;
+  padding: 8px 0;
+  box-sizing: border-box;
+  background-color: #f1f1f1;
 }
 
 .collection-list {
@@ -48,11 +49,11 @@ html, body {
 .collection-item {
   cursor: pointer;
   user-select: none;
-  padding: 1px 8px;
+  padding: 0 4px;
 }
 
 .collection-item .current-bg {
-  padding: 6px 8px;
+  padding: 7px 8px;
   border-radius: 5px;
   border: none;
   font-size: 13px;
@@ -60,11 +61,11 @@ html, body {
 }
 
 .collection-item:hover .current-bg {
-  background: #f1f1f1;  
+  background: #e6e6e6;  
 }
 
 .collection-item.active .current-bg {
-  background: #f1f1f1;
+  background: #fff;
 }
 
 
@@ -154,6 +155,11 @@ html, body {
   flex-wrap: wrap;
 }
 
+/* Для всех рядов с fill-группой уменьшать вертикальный gap до 4px */
+.row:has(.radio-group--fill) {
+  row-gap: 4px;
+}
+
 .hidden {
   display: none !important;
 }
@@ -189,4 +195,80 @@ html, body {
 .collection-props .row > input[type="number"],
 .collection-props .row > input[type="search"] {
   flex: 1 1 100%;
+}
+
+/* Radio Group: горизонтальная группа взаимоисключающего выбора */
+.radio-group {
+  display: inline-flex;
+  gap: 0; /* расстояние между элементами: 0px */
+  background: #f1f1f1; /* общий фон формы */
+  border-radius: 5px; /* общий радиус формы */
+  padding: 2px; /* отступ от общей формы 2px со всех сторон */
+  box-sizing: border-box; /* чтобы padding не раздувал ширину */
+}
+
+.radio {
+  position: relative;
+  margin: 0; /* без внешних отступов между элементами */
+}
+
+.radio input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio label {
+  display: block;
+  padding: 4px 8px; /* вертикально 4px, горизонтально 8px */
+  font-size: 13px;
+  line-height: 16px;
+  color: #161616;
+  background: transparent; /* по умолчанию без фона */
+  border-radius: 4px; /* радиус у элементов */
+  user-select: none;
+  cursor: pointer;
+  white-space: nowrap; /* без переноса */
+}
+
+.radio input[type="radio"]:checked + label {
+  background: #ffffff; /* активный — #fff */
+}
+
+/* Модификатор: тянущаяся группа с равными долями */
+.radio-group--fill {
+  display: flex;         /* тянется на всю строку */
+  flex: 1 1 auto;        /* занимает оставшуюся ширину ряда */
+  min-width: 0;          /* позволяет ужиматься без переполнения */
+}
+.radio-group--fill .radio {
+  flex: 1 1 0;        /* равные доли */
+  min-width: 0;       /* позволяет тексту обрезаться */
+}
+.radio-group--fill .radio label {
+  display: flex;              /* центрирование текста */
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;           /* длинные подписи */
+  white-space: nowrap;
+  text-overflow: ellipsis;    /* многоточие */
+}
+
+/* Универсальная вертикальная обёртка с растяжением на всю ширину */
+.vstack-fill {
+  display: flex;
+  flex-direction: column;   /* элементы друг под другом */
+  align-items: stretch;     /* каждый элемент тянется по ширине */
+  gap: 4px;                 /* компактный вертикальный отступ */
+  flex: 1 1 100%;           /* занимает доступную ширину в ряду */
+  min-width: 0;             /* предотвращает переполнение по ширине */
+  margin-bottom:12px;
+}
+
+/* Заголовок для радио-группы (по желанию) */
+.radio-group-label {
+  display: block;
+  font-size: 13px;
+  line-height: 16px;
+  color: #161616;
 }
