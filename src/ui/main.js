@@ -19,6 +19,9 @@
 
   // Финансы: замена select на радио-кнопки
   const decimalPlacesRadios = document.querySelectorAll('input[name="decimalPlaces"]');
+  const customTailBlock = document.getElementById("customTailBlock");
+  const customTailEnabled = document.getElementById("customTailEnabled");
+  const customTailValue = document.getElementById("customTailValue");
   const timeFormat = document.getElementById("timeFormat");
 
   const namesFormat = document.getElementById("namesFormat");
@@ -73,15 +76,33 @@
       const currencyEl = document.querySelector('input[name="currency"]:checked');
       const currency = currencyEl ? currencyEl.value : "RUB";
       const amount = randInt(1000, 999999) + Math.random();
+
+      // custom tail
+      const tailEnabled = !!(customTailEnabled && customTailEnabled.checked && (places === 1 || places === 2));
+      const tail = tailEnabled ? normalizeTail(places, customTailValue && customTailValue.value) : "";
+
+      const groupSep = currency === "USD" ? "," : " ";
+      const decSep = currency === "USD" ? "." : ",";
+      const intOnly = Math.floor(amount);
+      const intFormatted = String(intOnly).replace(/\B(?=(\d{3})+(?!\d))/g, groupSep);
+
+      let frac = "";
+      if (places > 0) {
+        if (tailEnabled) {
+          frac = tail || (places === 1 ? "0" : "00");
+        } else {
+          // сгенерировать случайную дробную часть по количеству знаков
+          if (places === 1) frac = String(randInt(0, 9));
+          else frac = String(randInt(0, 99)).padStart(2, "0");
+        }
+      }
+
       if (currency === "USD") {
-        const f = formatWithSeparators(amount, places, ",", ".");
-        preview = '\u0024' + f; // безопасно вставляем знак доллара
+        preview = places > 0 ? ("\u0024" + intFormatted + decSep + frac) : ("\u0024" + intFormatted);
       } else if (currency === "EUR") {
-        const f = formatThousands(amount, places); // пробелы и запятая как у RUB
-        preview = `${f} €`;
-      } else { // RUB по умолчанию
-        const f = formatThousands(amount, places);
-        preview = `${f} ₽`;
+        preview = places > 0 ? (intFormatted + decSep + frac + " €") : (intFormatted + " €");
+      } else { // RUB
+        preview = places > 0 ? (intFormatted + decSep + frac + " ₽") : (intFormatted + " ₽");
       }
     } else if (val === "time") {
       const fmt = timeFormat ? timeFormat.value : "digital_hhmm";
@@ -188,6 +209,47 @@
     if (domainLabel) setVisible(domainLabel, innerVisible);
     const note = domainRow ? domainRow.querySelector(".note-text") : null;
     if (note) setVisible(note, innerVisible);
+  }
+
+  function getDecimalPlaces() {
+    const dpEl = document.querySelector('input[name="decimalPlaces"]:checked');
+    return dpEl ? parseInt(dpEl.value, 10) : 2;
+  }
+
+  function normalizeTail(places, value) {
+    const digits = String(value || "").replace(/\D+/g, "");
+    if (places <= 0) return "";
+    if (places === 1) return digits.slice(0, 1).padEnd(1, "0");
+    return digits.slice(0, 2).padEnd(2, "0");
+  }
+
+  function sanitizeTail(places, value) {
+    const digits = String(value || "").replace(/\D+/g, "");
+    return places <= 0 ? "" : digits.slice(0, places);
+  }
+
+  function updateFinanceTailUI() {
+    const places = getDecimalPlaces();
+    const show = places === 1 || places === 2;
+    if (customTailBlock) {
+      if (show) customTailBlock.classList.remove("hidden");
+      else customTailBlock.classList.add("hidden");
+    }
+    if (customTailValue) {
+      customTailValue.maxLength = show ? places : 0;
+      // если активен чекбокс — корректируем значение при смене точности
+      if (customTailEnabled && customTailEnabled.checked) {
+        let v = sanitizeTail(places, customTailValue.value);
+        // при переходе на 2 знака из 1 — дописываем 0 справа, если одна цифра
+        if (places === 2 && v.length === 1) v = v + "0";
+        // при переходе на 1 знак — обрезаем до 1
+        if (places === 1 && v.length > 1) v = v.slice(0, 1);
+        customTailValue.value = places === 0 ? "" : v;
+      }
+      // placeholder по длине
+      customTailValue.placeholder = places === 1 ? "0" : "00";
+      customTailValue.disabled = !(customTailEnabled && customTailEnabled.checked);
+    }
   }
 
   function updateVisibility() {
@@ -318,7 +380,14 @@
   if (namesFormat) namesFormat.addEventListener("change", updateGlobalPreview);
   namesGenderRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   phoneFormatRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
-  decimalPlacesRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
+  decimalPlacesRadios.forEach((r) => r.addEventListener("change", () => { updateFinanceTailUI(); updateGlobalPreview(); }));
+  if (customTailEnabled) customTailEnabled.addEventListener("change", () => { updateFinanceTailUI(); updateGlobalPreview(); });
+  if (customTailValue) customTailValue.addEventListener("input", () => {
+    const places = getDecimalPlaces();
+    // только цифры и не больше выбранной длины; без дописывания нулей
+    customTailValue.value = sanitizeTail(places, customTailValue.value);
+    updateGlobalPreview();
+  });
   currencyRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
@@ -331,6 +400,7 @@
 
   // Initialize hidden state early
   updateVisibility();
+  updateFinanceTailUI();
   updateGlobalPreview();
   updateGlobalPreview();
 
@@ -358,7 +428,9 @@
       const places = dpEl ? parseInt(dpEl.value) : 2;
       const curEl = document.querySelector('input[name="currency"]:checked');
       const currency = curEl ? curEl.value : "RUB";
-      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency } }, "*");
+      const tailEnabled = !!(customTailEnabled && customTailEnabled.checked && (places === 1 || places === 2));
+      const tailValue = tailEnabled && customTailValue ? normalizeTail(places, customTailValue.value) : "";
+      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue } }, "*" );
     } else if (collection === "time") {
       const format = timeFormat.value;
       parent.postMessage({ pluginMessage: { type: "apply", collection, timeFormat: format } }, "*");

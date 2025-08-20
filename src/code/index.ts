@@ -1,5 +1,6 @@
 import uiHtml from "../ui/ui.html?raw";
 import stylesCss from "../ui/styles.css?raw";
+import interVarWoff2 from "../ui/fonts/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZJhiI2B.woff2?inline";
 import mainJs from "../ui/main.js?raw";
 // numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
@@ -10,7 +11,8 @@ import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, 
 
 // Собираем строку HTML с инъекцией стилей и скриптов
 let uiString: string = String(uiHtml);
-uiString = uiString.replace("/*__INJECT_STYLES__*/", String(stylesCss));
+const interFontFace = `@font-face {\n  font-family: 'Inter';\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n  src: url(${interVarWoff2}) format('woff2');\n}`;
+uiString = uiString.replace("/*__INJECT_STYLES__*/", interFontFace + "\n" + String(stylesCss));
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
 figma.showUI(uiString, { width: 570, height: 480 });
@@ -40,6 +42,8 @@ type UIMessage =
     phoneFormat?: PhoneFormatId;
     decimalPlaces?: number;
     currency?: "RUB" | "USD" | "EUR";
+    customTailEnabled?: boolean;
+    customTailValue?: string;
     timeFormat?: string;
     namesFormat?: string;
     namesGender?: string;
@@ -339,6 +343,7 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
 const generateFinanceEx = (
   decimalPlaces: number = 2,
   currency: "RUB" | "USD" | "EUR" = "RUB",
+  customTail?: string,
 ): string => {
   // базовое число совпадает с generateFinance по диапазону
   const whole = randomInt(1, 99999).toString();
@@ -352,9 +357,19 @@ const generateFinanceEx = (
     return parts.join(groupSep);
   };
 
+  const normalizeTail = (places: number, v?: string): string => {
+    const digits = String(v || "").replace(/\D+/g, "");
+    if (places <= 0) return "";
+    if (places === 1) return digits.slice(0, 1).padEnd(1, "0");
+    return digits.slice(0, 2).padEnd(2, "0");
+  };
+
+  const tail = customTail ? normalizeTail(decimalPlaces, customTail) : "";
+
   if (currency === "USD") {
     const intPart = formatThousands(whole, ",");
     if (decimalPlaces === 0) return "\u0024" + intPart;
+    if (tail) return "\u0024" + intPart + "." + tail;
     if (decimalPlaces === 1) return "\u0024" + intPart + "." + randomInt(0, 9).toString();
     return "\u0024" + intPart + "." + randomInt(0, 99).toString().padStart(2, "0");
   }
@@ -363,6 +378,7 @@ const generateFinanceEx = (
   const intPart = formatThousands(whole, " ");
   const sign = currency === "EUR" ? "€" : "₽";
   if (decimalPlaces === 0) return `${intPart} ${sign}`;
+  if (tail) return `${intPart},${tail} ${sign}`;
   if (decimalPlaces === 1) return `${intPart},${randomInt(0, 9)} ${sign}`;
   return `${intPart},${randomInt(0, 99).toString().padStart(2, "0")} ${sign}`;
 };
@@ -428,6 +444,8 @@ async function applyCollectionToSelection(
     phoneFormat?: PhoneFormatId;
     decimalPlaces?: number;
     currency?: "RUB" | "USD" | "EUR";
+    customTailEnabled?: boolean;
+    customTailValue?: string;
     timeFormat?: string;
     namesFormat?: string;
     namesGender?: string;
@@ -449,7 +467,11 @@ async function applyCollectionToSelection(
     } else if (collection === "phone_ru") {
       node.characters = generatePhoneRu(payload?.phoneFormat);
     } else if (collection === "finance") {
-      node.characters = generateFinanceEx(payload?.decimalPlaces, (payload?.currency as any) || "RUB");
+      node.characters = generateFinanceEx(
+        payload?.decimalPlaces,
+        (payload?.currency as any) || "RUB",
+        payload?.customTailEnabled ? payload?.customTailValue : undefined,
+      );
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
     } else if (collection === "names") {
@@ -492,6 +514,8 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       phoneFormat: msg.phoneFormat,
       decimalPlaces: msg.decimalPlaces,
       currency: msg.currency,
+      customTailEnabled: msg.customTailEnabled,
+      customTailValue: msg.customTailValue,
       timeFormat: msg.timeFormat,
       namesFormat: msg.namesFormat,
       namesGender: msg.namesGender,
