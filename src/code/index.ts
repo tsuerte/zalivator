@@ -11,7 +11,7 @@ import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, 
 
 // Собираем строку HTML с инъекцией стилей и скриптов
 let uiString: string = String(uiHtml);
-const interFontFace = `@font-face {\n  font-family: 'Inter';\n  font-style: normal;\n  font-weight: 100 900;\n  font-display: swap;\n  src: url(${interVarWoff2}) format('woff2');\n}`;
+const interFontFace = `@font-face {\n  font-family: 'Inter';\n  font-style: normal;\n  font-weight: 400 500;\n  font-display: swap;\n  src: url(${interVarWoff2}) format('woff2');\n}`;
 uiString = uiString.replace("/*__INJECT_STYLES__*/", interFontFace + "\n" + String(stylesCss));
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
