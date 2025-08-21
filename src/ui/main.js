@@ -33,6 +33,7 @@
   const financeMaxEl = document.getElementById("financeMax");
   const numbersMinEl = document.getElementById("numbersMin");
   const numbersMaxEl = document.getElementById("numbersMax");
+  const financeDistRadios = document.querySelectorAll('input[name="financeDist"]');
   // --- Preview helpers
   function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -85,7 +86,31 @@
       fmin = Math.min(Math.max(Math.floor(fmin), 0), MAX);
       fmax = Math.min(Math.max(Math.floor(fmax), 0), MAX);
       if (fmin > fmax) { const t = fmin; fmin = fmax; fmax = t; }
-      const intOnly = randInt(fmin, fmax);
+      // распределение: выборка x в [0,1]
+      const distEl = document.querySelector('input[name="financeDist"]:checked');
+      const dist = distEl ? distEl.value : "uniform";
+      const spreadPct = 80; // фиксированный разброс 80%
+      function sampleUnit() {
+        const u = Math.random();
+        if (dist === "uniform") return u;
+        if (dist === "skew_right") {
+          const t = 1 + (spreadPct / 100) * 6; // 1..7, больше t — больше масса у минимума
+          return Math.pow(u, t);
+        }
+        if (dist === "skew_left") {
+          const t = 1 + (spreadPct / 100) * 6; // 1..7, больше t — больше масса у максимума
+          return 1 - Math.pow(u, t);
+        }
+        // center: Irwin–Hall (усреднение N равномерных)
+        const n = 1 + Math.round((spreadPct / 100) * 7); // 1..8
+        let s = 0;
+        for (let i = 0; i < n; i++) s += Math.random();
+        return s / n;
+      }
+      const x = sampleUnit();
+      let intOnly = Math.floor(fmin + x * (fmax - fmin));
+      if (intOnly < fmin) intOnly = fmin;
+      if (intOnly > fmax) intOnly = fmax;
 
       // custom tail
       const tailEnabled = !!(customTailEnabled && customTailEnabled.checked && (places === 1 || places === 2));
@@ -400,6 +425,7 @@
   currencyRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   if (financeMinEl) financeMinEl.addEventListener("input", updateGlobalPreview);
   if (financeMaxEl) financeMaxEl.addEventListener("input", updateGlobalPreview);
+  financeDistRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
   if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
@@ -443,7 +469,9 @@
       const tailValue = tailEnabled && customTailValue ? normalizeTail(places, customTailValue.value) : "";
       const fmin = financeMinEl && financeMinEl.value !== "" ? parseInt(financeMinEl.value, 10) : 0;
       const fmax = financeMaxEl && financeMaxEl.value !== "" ? parseInt(financeMaxEl.value, 10) : 99999;
-      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue, financeMin: fmin, financeMax: fmax } }, "*" );
+      const distEl = document.querySelector('input[name="financeDist"]:checked');
+      const financeDist = distEl ? distEl.value : "uniform";
+      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue, financeMin: fmin, financeMax: fmax, financeDist } }, "*" );
     } else if (collection === "time") {
       const format = timeFormat.value;
       parent.postMessage({ pluginMessage: { type: "apply", collection, timeFormat: format } }, "*");

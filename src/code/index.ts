@@ -52,6 +52,8 @@ type UIMessage =
     numbersMax?: number;
     financeMin?: number;
     financeMax?: number;
+    financeDist?: "uniform" | "center" | "skew_left" | "skew_right";
+    financeSpread?: number; // 0..100
     };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
@@ -348,12 +350,40 @@ const generateFinanceEx = (
   customTail?: string,
   minWhole?: number,
   maxWhole?: number,
+  dist: "uniform" | "center" | "skew_left" | "skew_right" = "uniform",
+  spreadPercent: number = 80,
 ): string => {
   // базовое число совпадает с generateFinance по диапазону
   let min = typeof minWhole === "number" ? Math.max(0, Math.floor(minWhole)) : 0;
   let max = typeof maxWhole === "number" ? Math.max(0, Math.floor(maxWhole)) : 99999;
   if (min > max) { const t = min; min = max; max = t; }
-  const whole = randomInt(min, max).toString();
+  let wholeInt: number;
+  if (min === max) {
+    wholeInt = min;
+  } else {
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+    const sp = clamp(Math.floor(spreadPercent), 0, 100);
+    const u = Math.random();
+    let x: number;
+    if (dist === "uniform") {
+      x = u;
+    } else if (dist === "skew_right") {
+      const t = 1 + (sp / 100) * 6; // 1..7
+      x = Math.pow(u, t);
+    } else if (dist === "skew_left") {
+      const t = 1 + (sp / 100) * 6;
+      x = 1 - Math.pow(u, t);
+    } else {
+      const n = 1 + Math.round((sp / 100) * 7); // 1..8
+      let s = 0;
+      for (let i = 0; i < n; i++) s += Math.random();
+      x = s / n;
+    }
+    wholeInt = Math.floor(min + x * (max - min));
+    if (wholeInt < min) wholeInt = min;
+    if (wholeInt > max) wholeInt = max;
+  }
+  const whole = String(wholeInt);
 
   const formatThousands = (num: string, groupSep: string): string => {
     if (num.length <= 3) return num;
@@ -461,6 +491,8 @@ async function applyCollectionToSelection(
     numbersMax?: number;
     financeMin?: number;
     financeMax?: number;
+    financeDist?: "uniform" | "center" | "skew_left" | "skew_right";
+    financeSpread?: number;
   },
 ): Promise<number> {
   const textNodes = collectSelectedTextNodes();
@@ -482,6 +514,8 @@ async function applyCollectionToSelection(
         payload?.customTailEnabled ? payload?.customTailValue : undefined,
         payload?.financeMin,
         payload?.financeMax,
+        (payload?.financeDist as any) || "uniform",
+        typeof payload?.financeSpread === 'number' ? payload?.financeSpread! : 80,
       );
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
@@ -535,6 +569,8 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       numbersMax: msg.numbersMax,
       financeMin: msg.financeMin,
       financeMax: msg.financeMax,
+      financeDist: msg.financeDist,
+      financeSpread: msg.financeSpread,
     });
     figma.ui.postMessage({ type: "applied", count } as any);
     if (count === 0) {

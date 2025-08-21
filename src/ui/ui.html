@@ -75,6 +75,29 @@
                 <input id="financeMax" type="number" placeholder="99999" min="0" max="1000000000" step="1" />
               </div>
             </div>
+
+            <div class="vstack-fill" id="financeDistRow">
+              <span class="radio-group-label">Распределение:</span>
+              <div class="radio-group radio-group--fill" role="radiogroup" aria-label="Распределение">
+                <div class="radio">
+                  <input type="radio" id="financeDist-uniform" name="financeDist" value="uniform" checked />
+                  <label for="financeDist-uniform">Обычное</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="financeDist-center" name="financeDist" value="center" />
+                  <label for="financeDist-center">Центр</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="financeDist-left" name="financeDist" value="skew_left" />
+                  <label for="financeDist-left">Вправо</label>
+                </div>
+                <div class="radio">
+                  <input type="radio" id="financeDist-right" name="financeDist" value="skew_right" />
+                  <label for="financeDist-right">Влево</label>
+                </div>
+              </div>
+              <!-- Разброс зафиксирован на 100%: слайдер убран -->
+            </div>
             
             <div class="vstack-fill">
               <span class="radio-group-label">Валюта:</span>
