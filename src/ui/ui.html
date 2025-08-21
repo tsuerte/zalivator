@@ -143,23 +143,31 @@
           </div>
 
           <!-- Время -->
-          <div id="timeRow">
+            <div id="timeRow">
             <div>
               <select id="timeFormat" class="widget-select">
-                <option value="digital_hhmm" selected>09:05</option>
-                <option value="digital_hhmmss">09:05:07</option>
-                <option value="units_hhmm">9 ч 5 м</option>
-                <option value="units_hhmmss">9 ч 5 м 7 с</option>
-                <option value="units_hh">9 ч</option>
-                <option value="units_mmss">5 м 7 с</option>
-                <option value="text_hhmm">9 часов 5 минут</option>
-                <option value="text_hhmmss">9 часов 5 минут 7 секунд</option>
-                <option value="text_hh">9 часов</option>
-                <option value="text_mmss">5 минут 7 секунд</option>
-                <option value="timer_mmss">05:07</option>
-                <option value="timer_mss">5:07</option>
-                <option value="timer_mmss_hundredths">05:07,32</option>
-                <option value="timer_mmss_milliseconds">05:07,325</option>
+                <optgroup label="Цифровые">
+                  <option value="digital_hhmm" selected>09:05</option>
+                  <option value="digital_hhmmss">09:05:07</option>
+                </optgroup>
+                <optgroup label="Единицы">
+                  <option value="units_hhmm">9 ч 5 м</option>
+                  <option value="units_hhmmss">9 ч 5 м 7 с</option>
+                  <option value="units_hh">9 ч</option>
+                  <option value="units_mmss">5 м 7 с</option>
+                </optgroup>
+                <optgroup label="Текст">
+                  <option value="text_hhmm">9 часов 5 минут</option>
+                  <option value="text_hhmmss">9 часов 5 минут 7 секунд</option>
+                  <option value="text_hh">9 часов</option>
+                  <option value="text_mmss">5 минут 7 секунд</option>
+                </optgroup>
+                <optgroup label="Таймер">
+                  <option value="timer_mmss">05:07</option>
+                  <option value="timer_mss">5:07</option>
+                  <option value="timer_mmss_hundredths">05:07,32</option>
+                  <option value="timer_mmss_milliseconds">05:07,325</option>
+                </optgroup>
               </select>
             </div>
           </div>

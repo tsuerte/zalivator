@@ -229,6 +229,12 @@ html, body {
   flex: 0 0 auto;
 }
 
+/* Finance: custom tail input fixed width */
+#customTailBlock #customTailValue {
+  width: 100px;
+  flex: 0 0 auto;
+}
+
 /* Selects styled similar to inputs */
 .collection-props select.widget-select {
   width: 100%;

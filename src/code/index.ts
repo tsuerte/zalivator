@@ -2,8 +2,10 @@ import uiHtml from "../ui/ui.html?raw";
 import stylesCss from "../ui/styles.css?raw";
 import interVarWoff2 from "../ui/fonts/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZJhiI2B.woff2?inline";
 import mainJs from "../ui/main.js?raw";
+import timeInflectRuntimeRaw from "../shared/timeInflect.runtime.js?raw";
 // numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
+import { getHourForm, getMinuteForm, getSecondForm } from "../shared/timeInflect";
 import { generatePhoneRu } from "./generators/phoneRu";
 import { corpDomains } from "../data/corp";
 import { generateNumber as genNumber } from "./generators/numbers";
@@ -13,7 +15,8 @@ import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, 
 let uiString: string = String(uiHtml);
 const interFontFace = `@font-face {\n  font-family: 'Inter';\n  font-style: normal;\n  font-weight: 400 500;\n  font-display: swap;\n  src: url(${interVarWoff2}) format('woff2');\n}`;
 uiString = uiString.replace("/*__INJECT_STYLES__*/", interFontFace + "\n" + String(stylesCss));
-uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(mainJs));
+// Inject runtime helper before main UI script
+uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(timeInflectRuntimeRaw) + "\n" + String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
 figma.showUI(uiString, { width: 570, height: 480 });
 
@@ -177,45 +180,8 @@ const generateTime = (format: string = "digital_hhmm"): string => {
   const hundredths = randomInt(0, 99);
   const milliseconds = randomInt(0, 999);
 
-  // Узкий неразрывной пробел для единиц измерения
-  const narrowSpace = "\u202F";
-
-  // Функция для склонения часов
-  const getHourForm = (h: number): string => {
-    if (h === 1 || h === 21) return "час";
-    if ((h >= 2 && h <= 4) || (h >= 22 && h <= 24)) return "часа";
-    return "часов";
-  };
-
-  // Функция для склонения минут
-  const getMinuteForm = (m: number): string => {
-    if (m === 1 || m === 21 || m === 31 || m === 41 || m === 51)
-      return "минута";
-    if (
-      (m >= 2 && m <= 4) ||
-      (m >= 22 && m <= 24) ||
-      (m >= 32 && m <= 34) ||
-      (m >= 42 && m <= 44) ||
-      (m >= 52 && m <= 54)
-    )
-      return "минуты";
-    return "минут";
-  };
-
-  // Функция для склонения секунд
-  const getSecondForm = (s: number): string => {
-    if (s === 1 || s === 21 || s === 31 || s === 41 || s === 51)
-      return "секунда";
-    if (
-      (s >= 2 && s <= 4) ||
-      (s >= 22 && s <= 24) ||
-      (s >= 32 && s <= 34) ||
-      (s >= 42 && s <= 44) ||
-      (s >= 52 && s <= 54)
-    )
-      return "секунды";
-    return "секунд";
-  };
+  // Используем обычный пробел между числами и единицами
+  const narrowSpace = " ";
 
   switch (format) {
     case "digital_hhmm":
