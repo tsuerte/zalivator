@@ -29,6 +29,8 @@
   const currencyRadios = document.querySelectorAll('input[name="currency"]');
   const phoneFormatRadios = document.querySelectorAll('input[name="phoneFormat"]');
   const previewValueEl = document.getElementById("previewValue");
+  const financeMinEl = document.getElementById("financeMin");
+  const financeMaxEl = document.getElementById("financeMax");
   const numbersMinEl = document.getElementById("numbersMin");
   const numbersMaxEl = document.getElementById("numbersMax");
   // --- Preview helpers
@@ -75,7 +77,15 @@
       const places = dpEl ? parseInt(dpEl.value) : 2;
       const currencyEl = document.querySelector('input[name="currency"]:checked');
       const currency = currencyEl ? currencyEl.value : "RUB";
-      const amount = randInt(1000, 999999) + Math.random();
+      const MAX = 1000000000;
+      let fmin = financeMinEl && financeMinEl.value !== "" ? parseInt(financeMinEl.value, 10) : 0;
+      let fmax = financeMaxEl && financeMaxEl.value !== "" ? parseInt(financeMaxEl.value, 10) : 99999;
+      if (isNaN(fmin)) fmin = 0;
+      if (isNaN(fmax)) fmax = 0;
+      fmin = Math.min(Math.max(Math.floor(fmin), 0), MAX);
+      fmax = Math.min(Math.max(Math.floor(fmax), 0), MAX);
+      if (fmin > fmax) { const t = fmin; fmin = fmax; fmax = t; }
+      const intOnly = randInt(fmin, fmax);
 
       // custom tail
       const tailEnabled = !!(customTailEnabled && customTailEnabled.checked && (places === 1 || places === 2));
@@ -83,7 +93,6 @@
 
       const groupSep = currency === "USD" ? "," : " ";
       const decSep = currency === "USD" ? "." : ",";
-      const intOnly = Math.floor(amount);
       const intFormatted = String(intOnly).replace(/\B(?=(\d{3})+(?!\d))/g, groupSep);
 
       let frac = "";
@@ -389,6 +398,8 @@
     updateGlobalPreview();
   });
   currencyRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
+  if (financeMinEl) financeMinEl.addEventListener("input", updateGlobalPreview);
+  if (financeMaxEl) financeMaxEl.addEventListener("input", updateGlobalPreview);
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
   if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
@@ -430,7 +441,9 @@
       const currency = curEl ? curEl.value : "RUB";
       const tailEnabled = !!(customTailEnabled && customTailEnabled.checked && (places === 1 || places === 2));
       const tailValue = tailEnabled && customTailValue ? normalizeTail(places, customTailValue.value) : "";
-      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue } }, "*" );
+      const fmin = financeMinEl && financeMinEl.value !== "" ? parseInt(financeMinEl.value, 10) : 0;
+      const fmax = financeMaxEl && financeMaxEl.value !== "" ? parseInt(financeMaxEl.value, 10) : 99999;
+      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue, financeMin: fmin, financeMax: fmax } }, "*" );
     } else if (collection === "time") {
       const format = timeFormat.value;
       parent.postMessage({ pluginMessage: { type: "apply", collection, timeFormat: format } }, "*");

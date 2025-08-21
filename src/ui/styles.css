@@ -216,6 +216,29 @@ html, body {
   flex: 1 1 100%;
 }
 
+/* Selects styled similar to inputs */
+.collection-props select.widget-select {
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 6px 10px; /* align with text inputs */
+  background: var(--c-bg);
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--c-border-inset);
+  color: var(--c-text);
+  font-size: var(--fs-13);
+  line-height: var(--lh-16);
+  font-weight: 400;
+  border-radius: var(--r-5);
+}
+
+/* If select is direct child of a row, allow it to span full width */
+.collection-props .row > select.widget-select {
+  flex: 1 1 100%;
+}
+
 /* Radio Group: горизонтальная группа взаимоисключающего выбора */
 .radio-group {
   display: inline-flex;

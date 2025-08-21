@@ -50,6 +50,8 @@ type UIMessage =
     numbersDecimal?: boolean;
     numbersMin?: number;
     numbersMax?: number;
+    financeMin?: number;
+    financeMax?: number;
     };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
@@ -344,9 +346,14 @@ const generateFinanceEx = (
   decimalPlaces: number = 2,
   currency: "RUB" | "USD" | "EUR" = "RUB",
   customTail?: string,
+  minWhole?: number,
+  maxWhole?: number,
 ): string => {
   // базовое число совпадает с generateFinance по диапазону
-  const whole = randomInt(1, 99999).toString();
+  let min = typeof minWhole === "number" ? Math.max(0, Math.floor(minWhole)) : 0;
+  let max = typeof maxWhole === "number" ? Math.max(0, Math.floor(maxWhole)) : 99999;
+  if (min > max) { const t = min; min = max; max = t; }
+  const whole = randomInt(min, max).toString();
 
   const formatThousands = (num: string, groupSep: string): string => {
     if (num.length <= 3) return num;
@@ -452,6 +459,8 @@ async function applyCollectionToSelection(
     numbersDecimal?: boolean;
     numbersMin?: number;
     numbersMax?: number;
+    financeMin?: number;
+    financeMax?: number;
   },
 ): Promise<number> {
   const textNodes = collectSelectedTextNodes();
@@ -471,6 +480,8 @@ async function applyCollectionToSelection(
         payload?.decimalPlaces,
         (payload?.currency as any) || "RUB",
         payload?.customTailEnabled ? payload?.customTailValue : undefined,
+        payload?.financeMin,
+        payload?.financeMax,
       );
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
@@ -522,6 +533,8 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       numbersDecimal: msg.numbersDecimal,
       numbersMin: msg.numbersMin,
       numbersMax: msg.numbersMax,
+      financeMin: msg.financeMin,
+      financeMax: msg.financeMax,
     });
     figma.ui.postMessage({ type: "applied", count } as any);
     if (count === 0) {
