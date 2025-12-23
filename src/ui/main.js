@@ -31,6 +31,7 @@
   const previewValueEl = document.getElementById("previewValue");
   const financeMinEl = document.getElementById("financeMin");
   const financeMaxEl = document.getElementById("financeMax");
+  const financeSortEl = document.getElementById("financeSort");
   const numbersMinEl = document.getElementById("numbersMin");
   const numbersMaxEl = document.getElementById("numbersMax");
   const financeDistRadios = document.querySelectorAll('input[name="financeDist"]');
@@ -53,6 +54,24 @@
     return places === 0 ? parts[0] : parts[0] + decimalSep + parts[1];
   }
   const RUS_LETTERS = Array.from("АВЕКМНОРСТУХ");
+  const RUS_PLATE_REGIONS = [
+    "77","97","99","177","197","199","777","797","799",
+    "78","98","178",
+    "50","90","150","190","750","790",
+    "16","116","02","102",
+    "23","93","123",
+    "61","161",
+    "66","96","196",
+    "63","163",
+    "52","152",
+    "54","154",
+    "74","174",
+    "59","159",
+    "36","136",
+    "34","134",
+    "64","164",
+    "55","155",
+  ];
   const maleFirst = ["Иван", "Алексей", "Дмитрий", "Николай", "Сергей"];
   const maleLast = ["Иванов", "Петров", "Сидоров", "Смирнов", "Кузнецов"];
   const femaleFirst = ["Анна", "Мария", "Екатерина", "Ольга", "Елена"];
@@ -221,7 +240,7 @@
       const D = pad(randInt(0,999),3);
       const L2 = pick(RUS_LETTERS);
       const L3 = pick(RUS_LETTERS);
-      const R = String(randInt(1, 799));
+      const R = pick(RUS_PLATE_REGIONS);
       preview = `${L1}${D}${L2}${L3}${R}`;
     } else if (val === "kpp") {
       preview = pad(randInt(0, 999999999), 9);
@@ -427,6 +446,7 @@
   currencyRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   if (financeMinEl) financeMinEl.addEventListener("input", updateGlobalPreview);
   if (financeMaxEl) financeMaxEl.addEventListener("input", updateGlobalPreview);
+  if (financeSortEl) financeSortEl.addEventListener("change", updateGlobalPreview);
   financeDistRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
   const numbersDecimalEl = document.getElementById("numbersDecimal");
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
@@ -473,7 +493,8 @@
       const fmax = financeMaxEl && financeMaxEl.value !== "" ? parseInt(financeMaxEl.value, 10) : 99999;
       const distEl = document.querySelector('input[name="financeDist"]:checked');
       const financeDist = distEl ? distEl.value : "uniform";
-      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue, financeMin: fmin, financeMax: fmax, financeDist } }, "*" );
+      const financeSort = financeSortEl ? financeSortEl.value : "random";
+      parent.postMessage({ pluginMessage: { type: "apply", collection, decimalPlaces: places, currency, customTailEnabled: tailEnabled, customTailValue: tailValue, financeMin: fmin, financeMax: fmax, financeDist, financeSort } }, "*" );
     } else if (collection === "time") {
       const format = timeFormat.value;
       parent.postMessage({ pluginMessage: { type: "apply", collection, timeFormat: format } }, "*");

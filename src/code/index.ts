@@ -33,6 +33,7 @@ type CollectionId =
   | "names"
   | "rus_plate"
   | "numbers";
+type FinanceSort = "random" | "asc" | "desc";
 
 type UIMessage =
   | { type: "getCollections" }
@@ -57,6 +58,7 @@ type UIMessage =
     financeMax?: number;
     financeDist?: "uniform" | "center" | "skew_left" | "skew_right";
     financeSpread?: number; // 0..100
+    financeSort?: FinanceSort;
     };
 
 type PhoneFormatId = "space_dash" | "paren_dash" | "plain_space";
@@ -310,18 +312,24 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
 };
 
 // Расширенный генератор финансов с выбором валюты и локали форматирования
-const generateFinanceEx = (
-  decimalPlaces: number = 2,
-  currency: "RUB" | "USD" | "EUR" = "RUB",
-  customTail?: string,
-  minWhole?: number,
-  maxWhole?: number,
-  dist: "uniform" | "center" | "skew_left" | "skew_right" = "uniform",
-  spreadPercent: number = 80,
-): string => {
-  // базовое число совпадает с generateFinance по диапазону
-  let min = typeof minWhole === "number" ? Math.max(0, Math.floor(minWhole)) : 0;
-  let max = typeof maxWhole === "number" ? Math.max(0, Math.floor(maxWhole)) : 99999;
+type FinanceOptions = {
+  decimalPlaces?: number;
+  currency?: "RUB" | "USD" | "EUR";
+  customTail?: string;
+  minWhole?: number;
+  maxWhole?: number;
+  dist?: "uniform" | "center" | "skew_left" | "skew_right";
+  spreadPercent?: number;
+};
+
+const sampleFinanceValue = (opts: FinanceOptions): { amount: number; text: string } => {
+  const decimalPlaces = typeof opts.decimalPlaces === "number" ? opts.decimalPlaces : 2;
+  const currency = opts.currency || "RUB";
+  const dist = opts.dist || "uniform";
+  const spreadPercent = typeof opts.spreadPercent === "number" ? opts.spreadPercent : 80;
+
+  let min = typeof opts.minWhole === "number" ? Math.max(0, Math.floor(opts.minWhole)) : 0;
+  let max = typeof opts.maxWhole === "number" ? Math.max(0, Math.floor(opts.maxWhole)) : 99999;
   if (min > max) { const t = min; min = max; max = t; }
   let wholeInt: number;
   if (min === max) {
@@ -367,23 +375,52 @@ const generateFinanceEx = (
     return digits.slice(0, 2).padEnd(2, "0");
   };
 
-  const tail = customTail ? normalizeTail(decimalPlaces, customTail) : "";
+  const tail = opts.customTail ? normalizeTail(decimalPlaces, opts.customTail) : "";
 
-  if (currency === "USD") {
-    const intPart = formatThousands(whole, ",");
-    if (decimalPlaces === 0) return "\u0024" + intPart;
-    if (tail) return "\u0024" + intPart + "." + tail;
-    if (decimalPlaces === 1) return "\u0024" + intPart + "." + randomInt(0, 9).toString();
-    return "\u0024" + intPart + "." + randomInt(0, 99).toString().padStart(2, "0");
+  let fracDigits = "";
+  if (decimalPlaces > 0) {
+    if (tail) fracDigits = tail;
+    else if (decimalPlaces === 1) fracDigits = randomInt(0, 9).toString();
+    else fracDigits = randomInt(0, 99).toString().padStart(2, "0");
   }
 
-  // EUR и RUB формат одинаков, меняется только знак валюты
-  const intPart = formatThousands(whole, " ");
-  const sign = currency === "EUR" ? "€" : "₽";
-  if (decimalPlaces === 0) return `${intPart} ${sign}`;
-  if (tail) return `${intPart},${tail} ${sign}`;
-  if (decimalPlaces === 1) return `${intPart},${randomInt(0, 9)} ${sign}`;
-  return `${intPart},${randomInt(0, 99).toString().padStart(2, "0")} ${sign}`;
+  let text: string;
+  if (currency === "USD") {
+    const intPart = formatThousands(whole, ",");
+    if (decimalPlaces === 0) text = "\u0024" + intPart;
+    else text = "\u0024" + intPart + "." + fracDigits.padEnd(decimalPlaces, "0");
+  } else {
+    const intPart = formatThousands(whole, " ");
+    const sign = currency === "EUR" ? "€" : "₽";
+    if (decimalPlaces === 0) text = `${intPart} ${sign}`;
+    else text = `${intPart},${fracDigits.padEnd(decimalPlaces, "0")} ${sign}`;
+  }
+
+  const amount = decimalPlaces === 0
+    ? wholeInt
+    : wholeInt + parseInt(fracDigits || "0", 10) / (decimalPlaces === 1 ? 10 : 100);
+
+  return { amount, text };
+};
+
+const generateFinanceEx = (
+  decimalPlaces: number = 2,
+  currency: "RUB" | "USD" | "EUR" = "RUB",
+  customTail?: string,
+  minWhole?: number,
+  maxWhole?: number,
+  dist: "uniform" | "center" | "skew_left" | "skew_right" = "uniform",
+  spreadPercent: number = 80,
+): string => {
+  return sampleFinanceValue({
+    decimalPlaces,
+    currency,
+    customTail,
+    minWhole,
+    maxWhole,
+    dist,
+    spreadPercent,
+  }).text;
 };
 
 function collectSelectedTextNodes(): TextNode[] {
@@ -459,13 +496,42 @@ async function applyCollectionToSelection(
     financeMax?: number;
     financeDist?: "uniform" | "center" | "skew_left" | "skew_right";
     financeSpread?: number;
+    financeSort?: FinanceSort;
   },
 ): Promise<number> {
   const textNodes = collectSelectedTextNodes();
   if (textNodes.length === 0) return 0;
 
+  // Подготовка предвыборки для финансов с сортировкой, чтобы порядок зависел от настройки
+  let financeSamples: { amount: number; text: string }[] | null = null;
+  if (collection === "finance") {
+    const sort = (payload?.financeSort as FinanceSort) || "random";
+    const places = typeof payload?.decimalPlaces === "number" ? payload.decimalPlaces : 2;
+    const currency = (payload?.currency as "RUB" | "USD" | "EUR") || "RUB";
+    const customTail = payload?.customTailEnabled ? payload?.customTailValue : undefined;
+    const dist = (payload?.financeDist as any) || "uniform";
+    const spread = typeof payload?.financeSpread === "number" ? payload.financeSpread : 80;
+    financeSamples = textNodes.map(() =>
+      sampleFinanceValue({
+        decimalPlaces: places,
+        currency,
+        customTail,
+        minWhole: payload?.financeMin,
+        maxWhole: payload?.financeMax,
+        dist,
+        spreadPercent: spread,
+      }),
+    );
+    if (sort === "asc") {
+      financeSamples.sort((a, b) => a.amount - b.amount);
+    } else if (sort === "desc") {
+      financeSamples.sort((a, b) => b.amount - a.amount);
+    }
+  }
+
   // Load actual fonts used in nodes to keep user font
   const gen = generatorById[collection];
+  let financeIdx = 0;
   for (const node of textNodes) {
     await loadFontsForNode(node);
     if (collection === "inn") {
@@ -474,15 +540,33 @@ async function applyCollectionToSelection(
     } else if (collection === "phone_ru") {
       node.characters = generatePhoneRu(payload?.phoneFormat);
     } else if (collection === "finance") {
-      node.characters = generateFinanceEx(
-        payload?.decimalPlaces,
-        (payload?.currency as any) || "RUB",
-        payload?.customTailEnabled ? payload?.customTailValue : undefined,
-        payload?.financeMin,
-        payload?.financeMax,
-        (payload?.financeDist as any) || "uniform",
-        typeof payload?.financeSpread === 'number' ? payload?.financeSpread! : 80,
-      );
+      if (financeSamples) {
+        const sample = financeSamples[financeIdx];
+        if (sample) {
+          node.characters = sample.text;
+        } else {
+          node.characters = generateFinanceEx(
+            payload?.decimalPlaces,
+            (payload?.currency as any) || "RUB",
+            payload?.customTailEnabled ? payload?.customTailValue : undefined,
+            payload?.financeMin,
+            payload?.financeMax,
+            (payload?.financeDist as any) || "uniform",
+            typeof payload?.financeSpread === 'number' ? payload?.financeSpread! : 80,
+          );
+        }
+        financeIdx++;
+      } else {
+        node.characters = generateFinanceEx(
+          payload?.decimalPlaces,
+          (payload?.currency as any) || "RUB",
+          payload?.customTailEnabled ? payload?.customTailValue : undefined,
+          payload?.financeMin,
+          payload?.financeMax,
+          (payload?.financeDist as any) || "uniform",
+          typeof payload?.financeSpread === 'number' ? payload?.financeSpread! : 80,
+        );
+      }
     } else if (collection === "time") {
       node.characters = generateTime(payload?.timeFormat);
     } else if (collection === "names") {
@@ -537,6 +621,7 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       financeMax: msg.financeMax,
       financeDist: msg.financeDist,
       financeSpread: msg.financeSpread,
+      financeSort: msg.financeSort,
     });
     figma.ui.postMessage({ type: "applied", count } as any);
     if (count === 0) {

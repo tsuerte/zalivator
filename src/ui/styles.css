@@ -216,10 +216,12 @@ html, body {
   flex: 1 1 100%;
 }
 
-/* Finance bounds: two inputs with 100px width and a 12px separator */
+/* Finance bounds: inputs can сжиматься, но держим разумные пределы; разделитель фиксированный */
 #financeBoundsRow .row > input[type="number"] {
-  width: 100px;
-  flex: 0 0 auto;
+  width: auto;
+  flex: 1 1 0;
+  min-width: 70px;
+  max-width: 120px;
 }
 #financeBoundsRow .row > .range-sep {
   width: 12px;
@@ -228,11 +230,32 @@ html, body {
   align-self: center;
   flex: 0 0 auto;
 }
+#financeBoundsRow .row {
+  flex-wrap: nowrap; /* держим мин/макс и дефис в одной строке */
+  column-gap: var(--s-8);
+}
 
 /* Finance: custom tail input fixed width */
 #customTailBlock #customTailValue {
   width: 100px;
   flex: 0 0 auto;
+}
+
+/* Finance: bounds + sort row side by side */
+#financeBoundsSortRow {
+  align-items: flex-start;
+  gap: var(--s-12);
+}
+#financeBoundsRow {
+  flex: 1 1 0;
+  min-width: 0;
+}
+#financeSortRow {
+  flex: 0 1 140px;
+  min-width: 120px;
+}
+#financeSortRow select {
+  width: 100%;
 }
 
 /* Selects styled similar to inputs */

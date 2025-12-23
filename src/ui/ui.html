@@ -67,12 +67,22 @@
 
           <!-- Финансы -->
           <div id="financeRow">
-            <div class="vstack-fill" id="financeBoundsRow">
-              <span class="radio-group-label">Границы:</span>
-              <div class="row">
-                <input id="financeMin" type="number" placeholder="0" min="0" max="1000000000" step="1" />
-                <div class="range-sep" aria-hidden="true"></div>
-                <input id="financeMax" type="number" placeholder="99999" min="0" max="1000000000" step="1" />
+            <div class="row" id="financeBoundsSortRow">
+              <div class="vstack-fill" id="financeBoundsRow">
+                <span class="radio-group-label">Границы:</span>
+                <div class="row">
+                  <input id="financeMin" type="number" placeholder="0" min="0" max="1000000000" step="1" />
+                  <div class="range-sep" aria-hidden="true"></div>
+                  <input id="financeMax" type="number" placeholder="99999" min="0" max="1000000000" step="1" />
+                </div>
+              </div>
+              <div class="vstack-fill" id="financeSortRow">
+                <span class="radio-group-label">Сортировка:</span>
+                <select id="financeSort" class="widget-select">
+                  <option value="random" selected>Случайная</option>
+                  <option value="asc">Сначала меньше</option>
+                  <option value="desc">Сначала больше</option>
+                </select>
               </div>
             </div>
 
