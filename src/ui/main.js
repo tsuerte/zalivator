@@ -39,20 +39,6 @@
   function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function pad(num, len) { return String(num).padStart(len, "0"); }
-  function formatThousands(num, places) {
-    const fixed = places > 0 ? Number(num).toFixed(places) : Math.round(Number(num)).toString();
-    const parts = fixed.split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-    return parts.join(places === 0 ? "" : ",");
-  }
-
-  // Универсальный форматтер с задаваемыми разделителями
-  function formatWithSeparators(num, places, groupSep, decimalSep) {
-    const fixed = places > 0 ? Number(num).toFixed(places) : Math.round(Number(num)).toString();
-    const parts = fixed.split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, groupSep);
-    return places === 0 ? parts[0] : parts[0] + decimalSep + parts[1];
-  }
   const RUS_LETTERS = Array.from("АВЕКМНОРСТУХ");
   const RUS_PLATE_REGIONS = [
     "77","97","99","177","197","199","777","797","799",
@@ -257,15 +243,6 @@
     else el.classList.add("hidden");
   }
 
-  function updateDomainRow() {
-    const isCorpEmail = collectionSelect && collectionSelect.value === "corp_email";
-    const innerVisible = isCorpEmail && corpDomainMode && corpDomainMode.checked;
-    setVisible(domainInput, innerVisible);
-    if (domainLabel) setVisible(domainLabel, innerVisible);
-    const note = domainRow ? domainRow.querySelector(".note-text") : null;
-    if (note) setVisible(note, innerVisible);
-  }
-
   function getDecimalPlaces() {
     const dpEl = document.querySelector('input[name="decimalPlaces"]:checked');
     return dpEl ? parseInt(dpEl.value, 10) : 2;
@@ -452,15 +429,12 @@
   if (numbersDecimalEl) numbersDecimalEl.addEventListener("change", updateGlobalPreview);
   if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
   if (numbersMaxEl) numbersMaxEl.addEventListener("input", updateGlobalPreview);
-  if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
-  if (numbersMaxEl) numbersMaxEl.addEventListener("input", updateGlobalPreview);
   const innKindRadios = document.querySelectorAll('input[name="innKind"]');
   innKindRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
 
   // Initialize hidden state early
   updateVisibility();
   updateFinanceTailUI();
-  updateGlobalPreview();
   updateGlobalPreview();
 
   // Применение

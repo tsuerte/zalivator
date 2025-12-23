@@ -267,33 +267,6 @@ const generateNames = (
   }
 };
 
-const generateFinance = (decimalPlaces: number = 2): string => {
-  const rubles = randomInt(1, 99999).toString();
-
-  // Добавляем разделители тысяч для чисел > 999
-  const formatThousands = (num: string): string => {
-    if (num.length <= 3) return num;
-    const parts = [];
-    for (let i = num.length; i > 0; i -= 3) {
-      parts.unshift(num.slice(Math.max(0, i - 3), i));
-    }
-    return parts.join(" ");
-  };
-
-  const formattedRubles = formatThousands(rubles);
-  const sep = ",";
-
-  if (decimalPlaces === 0) {
-    return `${formattedRubles} ₽`;
-  } else if (decimalPlaces === 1) {
-    const kopecks = randomInt(0, 9).toString();
-    return `${formattedRubles}${sep}${kopecks} ₽`;
-  } else {
-    const kopecks = randomInt(0, 99).toString().padStart(2, "0");
-    return `${formattedRubles}${sep}${kopecks} ₽`;
-  }
-};
-
 const generatorById: Record<CollectionId, (arg?: any) => string> = {
   inn: () => generateInnFl(), // Default to FL, UI can override
   kpp: () => generateKpp(),
@@ -303,7 +276,6 @@ const generatorById: Record<CollectionId, (arg?: any) => string> = {
   phone_ru: (fmt?: string) =>
     generatePhoneRu((fmt as PhoneFormatId) || "paren_dash"),
   snils: () => generateSnils(),
-  finance: () => generateFinance(2), // Default: 2 decimal places, comma separator
   time: (fmt?: string) => generateTime(fmt || "digital_hhmm"),
   names: (fmt?: string) => generateNames(fmt || "full_fio", "any"),
   rus_plate: () => generateRusPlate(),
@@ -462,17 +434,6 @@ async function loadFontsForNode(node: TextNode): Promise<void> {
       i++;
     }
   }
-}
-
-const DEFAULT_FONT: FontName = { family: "Roboto", style: "Regular" };
-
-async function loadDefaultFont(): Promise<void> {
-  await figma.loadFontAsync(DEFAULT_FONT);
-}
-
-function ensureWritableFont(node: TextNode): void {
-  // Проще и предсказуемее: используем дефолтный шрифт
-  node.fontName = DEFAULT_FONT;
 }
 
 async function applyCollectionToSelection(
