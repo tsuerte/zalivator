@@ -3,6 +3,8 @@ import stylesCss from "../ui/styles.css?raw";
 import interVarWoff2 from "../ui/fonts/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZJhiI2B.woff2?inline";
 import mainJs from "../ui/main.js?raw";
 import timeInflectRuntimeRaw from "../shared/timeInflect.runtime.js?raw";
+import innFlSvgUrl from "../ui/assets/inn-fl.svg?url";
+import innUlSvgUrl from "../ui/assets/inn-ul.svg?url";
 // numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
 import { getHourForm, getMinuteForm, getSecondForm } from "../shared/timeInflect";
@@ -10,6 +12,7 @@ import { generatePhoneRu } from "./generators/phoneRu";
 import { corpDomains } from "../data/corp";
 import { generateNumber as genNumber } from "./generators/numbers";
 import { namesEmailFirst, namesEmailLast, namesRuMaleFirst, namesRuFemaleFirst, namesRuMaleLast, namesRuFemaleLast, namesRUFemalePatronymics, namesRUMalePatronymics } from "../data/names";
+import { INN_REGIONS } from "../data/innRegions";
 
 // Собираем строку HTML с инъекцией стилей и скриптов
 let uiString: string = String(uiHtml);
@@ -18,6 +21,9 @@ uiString = uiString.replace("/*__INJECT_STYLES__*/", interFontFace + "\n" + Stri
 // Inject runtime helper before main UI script
 uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(timeInflectRuntimeRaw) + "\n" + String(mainJs));
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
+uiString = uiString
+  .replace(/__INN_FL_SRC__/g, innFlSvgUrl)
+  .replace(/__INN_UL_SRC__/g, innUlSvgUrl);
 figma.showUI(uiString, { width: 570, height: 480 });
 
 // Генератор российских госномеров перенесён в отдельный модуль
@@ -42,7 +48,7 @@ type UIMessage =
       collection: CollectionId;
       domain?: string;
       useCustomDomain?: boolean;
-    innKind?: "fl" | "ul";
+    innKind?: "fl" | "ul" | "any";
     phoneFormat?: PhoneFormatId;
     decimalPlaces?: number;
     currency?: "RUB" | "USD" | "EUR";
@@ -92,18 +98,27 @@ const randomDigits = (length: number): number[] =>
   Array.from({ length }, () => randomInt(0, 9));
 
 // ---------- Generators
+const pickInnRegion = (): string => INN_REGIONS[randomInt(0, INN_REGIONS.length - 1)];
+const pickInnInspection = (): string => randomInt(1, 99).toString().padStart(2, "0");
+
 const generateInnUl = (): string => {
-  // 10‑digit INN for legal entities with checksum
-  const d = randomDigits(9);
+  // 10‑digit INN for legal entities: RR II OOOOO C
+  const region = pickInnRegion(); // 2 digits
+  const insp = pickInnInspection(); // 2 digits
+  const order = randomInt(0, 99999).toString().padStart(5, "0"); // 5 digits
+  const digits = (region + insp + order).split("").map((c) => parseInt(c, 10)); // 9 digits
   const coeff = [2, 4, 10, 3, 5, 9, 4, 6, 8];
-  const sum = d.reduce((acc, digit, i) => acc + digit * coeff[i], 0);
+  const sum = digits.reduce((acc, digit, i) => acc + digit * coeff[i], 0);
   const c10 = (sum % 11) % 10;
-  return [...d, c10].join("");
+  return region + insp + order + c10.toString();
 };
 
 const generateInnFl = (): string => {
-  // 12‑digit INN for individuals with 2 checksums
-  const d = randomDigits(10);
+  // 12‑digit INN for individuals: RR II OOOOOO CC
+  const region = pickInnRegion();
+  const insp = pickInnInspection();
+  const order = randomInt(0, 999999).toString().padStart(6, "0");
+  const d = (region + insp + order).split("").map((c) => parseInt(c, 10)); // 10 digits
   const c11 =
     ((7 * d[0] +
       2 * d[1] +
@@ -131,7 +146,7 @@ const generateInnFl = (): string => {
       8 * c11) %
       11) %
     10;
-  return [...d, c11, c12].join("");
+  return region + insp + order + c11.toString() + c12.toString();
 };
 
 const generateKpp = (): string => {
@@ -441,7 +456,7 @@ async function applyCollectionToSelection(
   payload?: {
     domain?: string;
     useCustomDomain?: boolean;
-    innKind?: "fl" | "ul";
+    innKind?: "fl" | "ul" | "any";
     phoneFormat?: PhoneFormatId;
     decimalPlaces?: number;
     currency?: "RUB" | "USD" | "EUR";
@@ -496,8 +511,11 @@ async function applyCollectionToSelection(
   for (const node of textNodes) {
     await loadFontsForNode(node);
     if (collection === "inn") {
-      node.characters =
-        payload?.innKind === "ul" ? generateInnUl() : generateInnFl();
+      let kind = payload?.innKind || "any";
+      if (kind === "any") {
+        kind = Math.random() < 0.5 ? "fl" : "ul";
+      }
+      node.characters = kind === "ul" ? generateInnUl() : generateInnFl();
     } else if (collection === "phone_ru") {
       node.characters = generatePhoneRu(payload?.phoneFormat);
     } else if (collection === "finance") {

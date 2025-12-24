@@ -16,6 +16,9 @@
   const timeRow = document.getElementById("timeRow");
   const namesRow = document.getElementById("namesRow");
   const numbersRow = document.getElementById("numbersRow");
+  const innIllustrationImg = document.getElementById("innIllustrationImg");
+  const innAnyHint = document.getElementById("innAnyHint");
+  const innVisualRow = document.getElementById("innVisualRow");
 
   // Финансы: замена select на радио-кнопки
   const decimalPlacesRadios = document.querySelectorAll('input[name="decimalPlaces"]');
@@ -173,7 +176,10 @@
       preview = `${pick(emailFirst)}.${pick(emailLast)}@${domain}`;
     } else if (val === "inn") {
       const checked = document.querySelector('input[name="innKind"]:checked');
-      const kind = checked ? checked.value : "fl";
+      let kind = checked ? checked.value : "any";
+      if (kind === "any") {
+        kind = Math.random() < 0.5 ? "fl" : "ul";
+      }
       preview = kind === "ul" ? pad(randInt(0, 9999999999), 10) : pad(randInt(0, 999999999999), 12);
     } else if (val === "phone_ru") {
       const checked = document.querySelector('input[name="phoneFormat"]:checked');
@@ -234,6 +240,35 @@
       preview = "";
     }
     previewValueEl.textContent = preview;
+    updateInnIllustration();
+  }
+
+  function updateInnIllustration() {
+    if (!innIllustrationImg && !innAnyHint) return;
+    const currentCollection = collectionSelect && collectionSelect.value;
+    const allowed = currentCollection === "inn" || currentCollection === "kpp" || currentCollection === "passport_ru";
+    if (!allowed) {
+      if (innIllustrationImg) innIllustrationImg.style.display = "none";
+      if (innAnyHint) innAnyHint.style.display = "none";
+      return;
+    }
+    const checked = document.querySelector('input[name="innKind"]:checked');
+    const kind = checked ? checked.value : "any";
+    const showImg = kind === "ul" || kind === "fl";
+    const showAny = kind === "any";
+    if (innIllustrationImg) {
+      if (showImg) {
+        innIllustrationImg.src = kind === "ul"
+          ? (innIllustrationImg.dataset.srcUl || "")
+          : (innIllustrationImg.dataset.srcFl || "");
+        innIllustrationImg.style.display = "block";
+      } else {
+        innIllustrationImg.style.display = "none";
+      }
+    }
+    if (innAnyHint) {
+      innAnyHint.style.display = showAny ? "block" : "none";
+    }
   }
 
   // Toggle visibility via CSS class (no inline display)
@@ -303,6 +338,12 @@
     Object.values(all).forEach((el) => setVisible(el, false));
     // Show mapped rows
     (map[val] || []).forEach((id) => setVisible(all[id], true));
+
+    // Show illustration row only for INN/KPP/Passport
+    if (innVisualRow) {
+      const showVisual = val === "inn" || val === "kpp" || val === "passport_ru";
+      setVisible(innVisualRow, showVisual);
+    }
 
     // Update inner controls visibility for domain row
     updateDomainRow();
@@ -430,12 +471,13 @@
   if (numbersMinEl) numbersMinEl.addEventListener("input", updateGlobalPreview);
   if (numbersMaxEl) numbersMaxEl.addEventListener("input", updateGlobalPreview);
   const innKindRadios = document.querySelectorAll('input[name="innKind"]');
-  innKindRadios.forEach((r) => r.addEventListener("change", updateGlobalPreview));
+  innKindRadios.forEach((r) => r.addEventListener("change", () => { updateGlobalPreview(); updateInnIllustration(); }));
 
   // Initialize hidden state early
-  updateVisibility();
-  updateFinanceTailUI();
+    updateVisibility();
+    updateFinanceTailUI();
   updateGlobalPreview();
+  updateInnIllustration();
 
   // Применение
   applyBtn.onclick = () => {
@@ -450,7 +492,7 @@
       parent.postMessage({ pluginMessage: { type: "apply", collection, domain, useCustomDomain } }, "*");
     } else if (collection === "inn") {
       const checked = document.querySelector('input[name="innKind"]:checked');
-      const innKind = checked ? checked.value : "fl";
+      const innKind = checked ? checked.value : "any";
       parent.postMessage({ pluginMessage: { type: "apply", collection, innKind } }, "*");
     } else if (collection === "phone_ru") {
       const checked = document.querySelector('input[name="phoneFormat"]:checked');

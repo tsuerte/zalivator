@@ -38,15 +38,23 @@
                 <span class="radio-group-label">Тип ИНН:</span>
                 <div class="radio-group radio-group--fill" role="radiogroup" aria-label="Тип ИНН">
                   <div class="radio">
-                    <input type="radio" id="innKind-fl" name="innKind" value="fl" checked />
-                    <label for="innKind-fl">Физлицо</label>
+                    <input type="radio" id="innKind-any" name="innKind" value="any" checked />
+                    <label for="innKind-any">Любой</label>
                   </div>
                   <div class="radio">
                     <input type="radio" id="innKind-ul" name="innKind" value="ul" />
                     <label for="innKind-ul">Юрлицо</label>
                   </div>
+                  <div class="radio">
+                    <input type="radio" id="innKind-fl" name="innKind" value="fl" />
+                    <label for="innKind-fl">Физлицо</label>
+                  </div>
                 </div>
               </div>
+            </div>
+            <div class="inn-illustration-wrap" id="innVisualRow">
+              <img id="innIllustrationImg" class="inn-illustration" alt="" src="" data-src-fl="__INN_FL_SRC__" data-src-ul="__INN_UL_SRC__" />
+              <div id="innAnyHint" class="inn-any-hint">Как повезёт</div>
             </div>
 
             <!-- Телефон -->

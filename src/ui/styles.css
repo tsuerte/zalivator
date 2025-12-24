@@ -151,6 +151,8 @@ html, body {
   overflow: auto;
   padding: var(--s-16);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .footer {
@@ -188,6 +190,27 @@ html, body {
 .note-text {
   font-size: 11px;
   color: var(--c-muted);
+}
+
+.inn-illustration-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 0;
+  flex: 1 1 auto;
+  }
+.inn-illustration {
+  max-width: 100%;
+  height: auto;
+  display: none;
+}
+.inn-any-hint {
+  display: none;
+  font-size: 36px;
+  line-height: 44px;
+  color: #161616;
+  text-align: center;
 }
 
 /* Inputs: standard text field */
