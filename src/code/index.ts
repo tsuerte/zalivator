@@ -5,6 +5,7 @@ import mainJs from "../ui/main.js?raw";
 import timeInflectRuntimeRaw from "../shared/timeInflect.runtime.js?raw";
 import innFlSvgUrl from "../ui/assets/inn-fl.svg?url";
 import innUlSvgUrl from "../ui/assets/inn-ul.svg?url";
+import kppSvgUrl from "../ui/assets/kpp.svg?url";
 // numbers UI helper script no longer injected; generation moved to code/generators
 import { generateRusPlate } from "./generators/rusPlate";
 import { getHourForm, getMinuteForm, getSecondForm } from "../shared/timeInflect";
@@ -23,7 +24,8 @@ uiString = uiString.replace("//__INJECT_MAIN_SCRIPT__", String(timeInflectRuntim
 uiString = uiString.replace("//__INJECT_NUMBERS_SCRIPT__", "");
 uiString = uiString
   .replace(/__INN_FL_SRC__/g, innFlSvgUrl)
-  .replace(/__INN_UL_SRC__/g, innUlSvgUrl);
+  .replace(/__INN_UL_SRC__/g, innUlSvgUrl)
+  .replace(/__KPP_SRC__/g, kppSvgUrl);
 figma.showUI(uiString, { width: 570, height: 480 });
 
 // Генератор российских госномеров перенесён в отдельный модуль
@@ -98,6 +100,7 @@ const randomDigits = (length: number): number[] =>
   Array.from({ length }, () => randomInt(0, 9));
 
 // ---------- Generators
+// INN/KPP регионы: используются совместно
 const pickInnRegion = (): string => INN_REGIONS[randomInt(0, INN_REGIONS.length - 1)];
 const pickInnInspection = (): string => randomInt(1, 99).toString().padStart(2, "0");
 
@@ -150,11 +153,13 @@ const generateInnFl = (): string => {
 };
 
 const generateKpp = (): string => {
-  // 9 digits, commonly NNNO1XXX; keep simple but valid format length
-  const insp = randomInt(100, 999).toString().padStart(3, "0");
-  const region = randomInt(1, 9).toString();
-  const reason = "01"; // typical main registration
-  const order = randomInt(1, 999).toString().padStart(3, "0");
+  // Формат КПП: RRII RR OOO (регион/инспекция/причина/порядковый), используем те же регионы, что для ИНН
+  const region = pickInnRegion(); // 2 цифры
+  const insp = pickInnInspection(); // 2 цифры
+  // причина постановки: 01 чаще всего, иногда 02/03/43
+  const reasons = ["01", "01", "01", "02", "03", "43"];
+  const reason = reasons[randomInt(0, reasons.length - 1)];
+  const order = randomInt(1, 999).toString().padStart(3, "0"); // 3 цифры
   return `${region}${insp}${reason}${order}`;
 };
 

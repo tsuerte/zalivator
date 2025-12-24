@@ -252,6 +252,15 @@
       if (innAnyHint) innAnyHint.style.display = "none";
       return;
     }
+    if (currentCollection === "kpp") {
+      if (innIllustrationImg) {
+        innIllustrationImg.src = innIllustrationImg.dataset.srcKpp || "";
+        innIllustrationImg.style.display = "block";
+      }
+      if (innAnyHint) innAnyHint.style.display = "none";
+      return;
+    }
+    // INN/Паспорт: показываем по типу, "Любой" — текст
     const checked = document.querySelector('input[name="innKind"]:checked');
     const kind = checked ? checked.value : "any";
     const showImg = kind === "ul" || kind === "fl";
